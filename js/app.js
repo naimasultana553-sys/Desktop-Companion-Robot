@@ -272,7 +272,7 @@ function initMainScene() {
 
   // Camera
   camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 300);
-  camera.position.set(2, 27, 36);
+  camera.position.set(2, 50, 65);
 
   // Controls
   controls = new OrbitControls(camera, renderer.domElement);
@@ -1028,7 +1028,7 @@ function setupViewerControls() {
     left: { p: [-30, 8, 0], t: [0, 5, 0] },
     right: { p: [30, 8, 0], t: [0, 5, 0] },
     top: { p: [0, 40, 0.1], t: [0, 0, 0] },
-    reset: { p: [2, 27, 36], t: [0, 1.5, 0] },
+    reset: { p: [2, 50, 65], t: [0, 2, 0] },
     robot: { p: [18, 20, 32], t: [0, 8.5, 0] },
   };
 
@@ -1130,7 +1130,7 @@ function setupModeToggle() {
       }
 
       // Update camera
-      const v = robotMode ? { p: [18, 20, 32], t: [0, 8.5, 0] } : { p: [2, 27, 36], t: [0, 1.5, 0] };
+      const v = robotMode ? { p: [18, 20, 32], t: [0, 8.5, 0] } : { p: [2, 50, 65], t: [0, 2, 0] };
       camera.position.set(...v.p);
       controls.target.set(...v.t);
 
