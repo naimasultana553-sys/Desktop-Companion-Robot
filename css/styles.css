@@ -101,43 +101,49 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
    ============================================================ */
 #intro-screen {
   position: fixed; inset: 0; z-index: 900;
-  background: var(--bg-primary);
+  background: #000;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-#intro-video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: contain;
-  background: #000;
-}
 #intro-overlay {
-  position: relative; z-index: 2;
-  text-align: center;
+  display: flex; align-items: center; gap: 40px;
   padding: 40px;
-  animation: introFadeIn 1s var(--ease) forwards;
+  animation: introFadeIn 0.8s var(--ease) forwards;
   opacity: 0;
 }
 @keyframes introFadeIn {
   to { opacity: 1; }
 }
+.intro-video-wrap {
+  flex-shrink: 0;
+  width: 340px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+}
+#intro-video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.intro-text-wrap {
+  text-align: left;
+  max-width: 380px;
+}
 .intro-title {
   font-family: var(--font-display);
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 10px;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
 .intro-subtitle {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
   margin-bottom: 32px;
-  text-shadow: 0 1px 10px rgba(0,0,0,0.5);
 }
 #intro-actions {
   display: flex; gap: 14px;
-  justify-content: center;
   flex-wrap: wrap;
   margin-bottom: 20px;
 }
@@ -157,10 +163,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 .btn-primary:hover { background: #5fded2; transform: translateY(-1px); box-shadow: 0 4px 20px var(--teal-glow); }
 .btn-secondary {
-  background: rgba(11, 14, 20, 0.7);
+  background: rgba(255,255,255,0.06);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  backdrop-filter: blur(8px);
 }
 .btn-secondary:hover { border-color: var(--amber); color: var(--amber); }
 .btn-ghost {
@@ -171,6 +176,15 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 .btn-ghost:hover { color: var(--text-secondary); }
 .arrow { margin-left: 4px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  #intro-overlay {
+    flex-direction: column; gap: 24px; text-align: center;
+  }
+  .intro-video-wrap { width: 260px; }
+  .intro-text-wrap { text-align: center; max-width: 100%; }
+}
 
 /* ============================================================
    NAVIGATION
