@@ -281,7 +281,7 @@ function initMainScene() {
   controls.dampingFactor = 0.08;
   controls.maxPolarAngle = Math.PI * 0.49;
   controls.minDistance = 10;
-  controls.maxDistance = 80;
+  controls.maxDistance = 120;
 
   // CSS2D Renderer for labels
   labelRenderer = new CSS2DRenderer();
