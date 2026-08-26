@@ -262,13 +262,13 @@ function initMainScene() {
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setClearColor(0x0B0E14);
+  renderer.setClearColor(0x000000);
   container.appendChild(renderer.domElement);
 
   // Scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0B0E14);
-  scene.fog = new THREE.Fog(0x0B0E14, 60, 130);
+  scene.background = new THREE.Color(0x000000);
+  scene.fog = new THREE.Fog(0x000000, 60, 130);
 
   // Camera
   camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 300);
