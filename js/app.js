@@ -1041,8 +1041,8 @@ const COMP_CAM = {
 
 function focusCamera(name) {
   const v = name === 'reset'
-    ? { p: [2, 50, 65], t: [0, 2, 0] }
-    : COMP_CAM[name] || { p: [2, 50, 65], t: [0, 2, 0] };
+    ? { p: [0, 60, 90], t: [0, 3, 0] }
+    : COMP_CAM[name] || { p: [0, 60, 90], t: [0, 3, 0] };
   const duration = 600;
   const startPos = camera.position.clone();
   const startTarget = controls.target.clone();
@@ -1066,8 +1066,8 @@ function setupViewerControls() {
     left: { p: [-30, 8, 0], t: [0, 5, 0] },
     right: { p: [30, 8, 0], t: [0, 5, 0] },
     top: { p: [0, 40, 0.1], t: [0, 0, 0] },
-    reset: { p: [2, 50, 65], t: [0, 2, 0] },
-    robot: { p: [18, 20, 32], t: [0, 8.5, 0] },
+    reset: { p: [0, 60, 90], t: [0, 3, 0] },
+    robot: { p: [30, 30, 50], t: [0, 8.5, 0] },
   };
 
   function setView(name) {
@@ -1168,7 +1168,7 @@ function setupModeToggle() {
       }
 
       // Update camera
-      const v = robotMode ? { p: [18, 20, 32], t: [0, 8.5, 0] } : { p: [2, 50, 65], t: [0, 2, 0] };
+      const v = robotMode ? { p: [30, 30, 50], t: [0, 8.5, 0] } : { p: [0, 60, 90], t: [0, 3, 0] };
       camera.position.set(...v.p);
       controls.target.set(...v.t);
 
