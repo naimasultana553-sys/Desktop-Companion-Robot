@@ -478,6 +478,13 @@ function initMainScene() {
 
   // Handle resize
   window.addEventListener('resize', onResize);
+
+  // Hide scene loader
+  const loader = document.getElementById('scene-loader');
+  if (loader) {
+    loader.classList.add('hidden');
+    setTimeout(() => loader.remove(), 800);
+  }
 }
 
 // ============================================================
@@ -1169,7 +1176,7 @@ function setupViewerControls() {
 
   function setView(name) {
     const v = views[name] || views.reset;
-    const duration = 800;
+    const duration = 500;
     const startPos = camera.position.clone();
     const startTarget = controls.target.clone();
     const endPos = new THREE.Vector3(...v.p);
@@ -1178,7 +1185,7 @@ function setupViewerControls() {
 
     function animateCam(now) {
       const t = Math.min(1, (now - startTime) / duration);
-      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const ease = 1 - Math.pow(1 - t, 3);
       camera.position.lerpVectors(startPos, endPos, ease);
       controls.target.lerpVectors(startTarget, endTarget, ease);
       if (t < 1) requestAnimationFrame(animateCam);
@@ -1382,6 +1389,7 @@ function buildHardwareCards() {
 
 function buildPinTable() {
   const tbody = document.querySelector('#pin-table tbody');
+  if (!tbody) return;
   for (const row of PIN_MAP) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -1429,6 +1437,39 @@ function initDashboard() {
     document.getElementById('nav-links').classList.toggle('open');
   });
 
+  // Mobile sidebar panel toggle
+  const mobileSidebarBtn = document.getElementById('mobile-sidebar-toggle');
+  if (mobileSidebarBtn) {
+    mobileSidebarBtn.addEventListener('click', () => {
+      const sidebar = document.getElementById('sidebar');
+      const rightPanel = document.getElementById('right-panel');
+      sidebar.classList.toggle('open');
+      rightPanel.classList.remove('open');
+    });
+  }
+
+  // Mobile detail panel toggle
+  const mobileDetailBtn = document.getElementById('mobile-detail-toggle');
+  if (mobileDetailBtn) {
+    mobileDetailBtn.addEventListener('click', () => {
+      const rightPanel = document.getElementById('right-panel');
+      const sidebar = document.getElementById('sidebar');
+      rightPanel.classList.toggle('open');
+      sidebar.classList.remove('open');
+    });
+  }
+
+  // Close panels when clicking overlay/backdrop on mobile
+  const viewport = document.getElementById('viewport');
+  if (viewport) {
+    viewport.addEventListener('click', (e) => {
+      if (e.target === viewport || e.target === document.getElementById('three-container')) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('right-panel').classList.remove('open');
+      }
+    });
+  }
+
   // Block diagram hover -> highlight 3D
   document.querySelectorAll('.block').forEach(block => {
     block.addEventListener('click', () => {
@@ -1446,7 +1487,14 @@ function setActiveSidebar(section) {
 
 function setActivePanel(section) {
   document.querySelectorAll('.panel-content').forEach(p => {
-    p.classList.toggle('active', p.dataset.panel === section);
+    if (p.dataset.panel === section) {
+      p.classList.add('active');
+      p.style.animation = 'none';
+      p.offsetHeight;
+      p.style.animation = '';
+    } else {
+      p.classList.remove('active');
+    }
   });
 }
 

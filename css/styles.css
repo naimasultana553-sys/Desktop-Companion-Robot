@@ -338,6 +338,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   z-index: 10;
 }
 .vc-btn {
+  position: relative;
   width: 36px; height: 36px;
   border-radius: 8px;
   background: rgba(11, 14, 20, 0.7);
@@ -349,6 +350,26 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   transition: all var(--duration) var(--ease);
   display: flex; align-items: center; justify-content: center;
 }
+.vc-btn .vc-tip {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(11, 14, 20, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+.vc-btn:hover .vc-tip { opacity: 1; }
 .vc-btn:hover { border-color: var(--teal); color: var(--teal); }
 .vc-btn.active { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
 
@@ -466,7 +487,14 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   flex: 1;
   overflow-y: auto;
 }
-.panel-content.active { display: flex; }
+.panel-content.active {
+  display: flex;
+  animation: panelSlideIn 0.35s var(--ease) both;
+}
+@keyframes panelSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 .panel-header {
   padding: 24px 24px 16px;
@@ -1094,6 +1122,87 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 
 /* ============================================================
+   SCENE LOADER
+   ============================================================ */
+#scene-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg-primary);
+  z-index: 15;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#scene-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader-iris svg {
+  animation: irisSpin 2s linear infinite;
+}
+.loader-ring {
+  stroke-dasharray: 80 30;
+  transform-origin: center;
+}
+.loader-ring.r2 {
+  stroke-dasharray: 40 50;
+  animation: irisSpin 3s linear infinite reverse;
+}
+@keyframes irisSpin {
+  to { transform: rotate(360deg); }
+}
+.loader-text {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   SECTION SEPARATION — dividers between panel-body children
+   ============================================================ */
+.panel-body > * + * {
+  margin-top: 14px;
+}
+.panel-body > .overview-card + .overview-card {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.panel-body > .hw-card + .hw-card {
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* ============================================================
+   MOBILE PANEL TOGGLES
+   ============================================================ */
+.mobile-panel-toggle {
+  display: none;
+  position: fixed;
+  bottom: 50px;
+  left: 16px;
+  z-index: 60;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(11, 14, 20, 0.85);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  align-items: center;
+  justify-content: center;
+}
+.mobile-panel-toggle:hover { border-color: var(--teal); color: var(--teal); }
+.mobile-panel-right { left: auto; right: 16px; }
+
+/* ============================================================
    PIN LABEL (CSS2DRenderer)
    ============================================================ */
 .pin-label {
@@ -1146,6 +1255,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
     transition: right var(--duration) var(--ease);
   }
   #right-panel.open { right: 0; }
+  .mobile-panel-toggle { display: flex; }
   .nav-toggle { display: flex; }
   .nav-links { display: none; }
   .nav-links.open {
@@ -1161,14 +1271,24 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
     z-index: 49;
   }
   .nav-link { padding: 12px 16px; }
+  #viewer-controls { top: 8px; right: 8px; }
+  #mode-toggle { top: 8px; }
+  .mode-btn { padding: 6px 10px; font-size: 0.72rem; }
+  .status-hint { display: none; }
 }
 
 @media (max-width: 600px) {
   :root { --nav-height: 48px; }
   .nav-title { font-size: 0.85rem; }
-  #mode-toggle { font-size: 0.75rem; }
-  .mode-btn { padding: 6px 10px; }
+  #mode-toggle { font-size: 0.75rem; left: 50%; top: 6px; }
+  .mode-btn { padding: 5px 8px; }
   .monitor-grid { grid-template-columns: 1fr; }
+  .panel-header { padding: 16px 16px 12px; }
+  .panel-body { padding: 14px 16px; }
+  .block-diagram { padding: 8px; }
+  .block-row { gap: 6px; }
+  .block { padding: 8px; font-size: 0.7rem; }
+  .mobile-panel-toggle { width: 40px; height: 40px; font-size: 1rem; bottom: 46px; }
 }
 
 /* ============================================================

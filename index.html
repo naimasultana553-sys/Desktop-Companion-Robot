@@ -146,17 +146,30 @@
 
     <!-- Center: 3D Viewport -->
     <main id="viewport" role="main">
-      <div id="three-container"></div>
+      <div id="three-container">
+        <div id="scene-loader">
+          <div class="loader-iris">
+            <svg viewBox="0 0 120 120" width="80" height="80">
+              <circle cx="60" cy="60" r="55" fill="none" stroke="#4FD1C5" stroke-width="2" opacity="0.3" class="loader-ring"/>
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#4FD1C5" stroke-width="1.5" opacity="0.5" class="loader-ring r2"/>
+              <circle cx="60" cy="60" r="25" fill="#4FD1C5" opacity="0.15"/>
+              <circle cx="60" cy="60" r="12" fill="#4FD1C5" opacity="0.6"/>
+              <circle cx="60" cy="60" r="4" fill="#4FD1C5"/>
+            </svg>
+          </div>
+          <p class="loader-text">Initializing 3D scene…</p>
+        </div>
+      </div>
 
       <!-- 3D Viewer Controls Overlay -->
       <div id="viewer-controls">
-        <button class="vc-btn" id="vc-reset" title="Reset camera">⟲</button>
-        <button class="vc-btn" id="vc-front" title="Front view">F</button>
-        <button class="vc-btn" id="vc-back" title="Back view">B</button>
-        <button class="vc-btn" id="vc-left" title="Left view">L</button>
-        <button class="vc-btn" id="vc-right" title="Right view">R</button>
-        <button class="vc-btn" id="vc-top" title="Top view">T</button>
-        <button class="vc-btn" id="vc-auto" title="Auto-rotate">⟳</button>
+        <button class="vc-btn" id="vc-reset" title="Reset camera" data-tip="Reset View">⟲<span class="vc-tip">Reset</span></button>
+        <button class="vc-btn" id="vc-front" title="Front view" data-tip="Front">F<span class="vc-tip">Front</span></button>
+        <button class="vc-btn" id="vc-back" title="Back view" data-tip="Back">B<span class="vc-tip">Back</span></button>
+        <button class="vc-btn" id="vc-left" title="Left view" data-tip="Left">L<span class="vc-tip">Left</span></button>
+        <button class="vc-btn" id="vc-right" title="Right view" data-tip="Right">R<span class="vc-tip">Right</span></button>
+        <button class="vc-btn" id="vc-top" title="Top view" data-tip="Top">T<span class="vc-tip">Top</span></button>
+        <button class="vc-btn" id="vc-auto" title="Auto-rotate" data-tip="Auto-Rotate">⟳<span class="vc-tip">Spin</span></button>
       </div>
 
       <!-- Mode Toggle -->
@@ -197,6 +210,9 @@
         <div class="status-mode">⚡ Simulation Mode</div>
         <div class="status-hint">Drag = rotate · Scroll = zoom · Right-drag = pan · Click parts for details</div>
       </div>
+      <!-- Mobile panel toggles -->
+      <button class="mobile-panel-toggle" id="mobile-sidebar-toggle" aria-label="Open sidebar menu">☰</button>
+      <button class="mobile-panel-toggle mobile-panel-right" id="mobile-detail-toggle" aria-label="Open detail panel">ℹ</button>
     </main>
 
     <!-- Right Panel -->
