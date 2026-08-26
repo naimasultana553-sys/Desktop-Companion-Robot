@@ -311,7 +311,7 @@ function initIntro3D() {
 
 function buildIntroRobot() {
   const root = new THREE.Group();
-  const shell = new THREE.MeshStandardMaterial({ color: 0xf3f1ec, roughness: 0.55, metalness: 0.04 });
+  const shell = new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.55, metalness: 0.04 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.4 });
 
   const B = (w, h, d, m, x, y, z, p) => {
@@ -337,7 +337,7 @@ function buildIntroRobot() {
   B(3.9, 2.8, 0.25, dark, 0, 5.9, 2.53, root);
 
   // Eyes (glowing teal)
-  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x39e6d0 });
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x5ec4b8 });
   B(1.0, 1.1, 0.1, eyeMat, -0.9, 6.2, 2.68, root);
   B(1.0, 1.1, 0.1, eyeMat, 0.9, 6.2, 2.68, root);
 
@@ -636,8 +636,8 @@ function drawFace(closed) {
   if (!oledCtx) return;
   const g = oledCtx;
   g.fillStyle = '#06121f'; g.fillRect(0, 0, 256, 128);
-  g.fillStyle = '#39e6d0'; g.strokeStyle = '#39e6d0';
-  g.shadowColor = '#39e6d0'; g.shadowBlur = 14;
+  g.fillStyle = '#5ec4b8'; g.strokeStyle = '#5ec4b8';
+  g.shadowColor = '#5ec4b8'; g.shadowBlur = 14;
   const ex = [86, 170], ey = 52, r = 24;
   if (closed) {
     g.lineWidth = 6; g.lineCap = 'round';
@@ -793,7 +793,7 @@ function buildAssembledRobot() {
   bump.repeat.set(5, 5);
 
   const shell = new THREE.MeshStandardMaterial({
-    color: 0xf3f1ec, roughness: 0.55, metalness: 0.04,
+    color: 0xf0f0f0, roughness: 0.55, metalness: 0.04,
     transparent: true, opacity: 1, bumpMap: bump, bumpScale: 0.05,
   });
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.4 });
@@ -816,7 +816,7 @@ function buildAssembledRobot() {
   const fg = fc.getContext('2d');
   function drawRobotFace(closed) {
     fg.fillStyle = '#050b12'; fg.fillRect(0, 0, 256, 160);
-    fg.fillStyle = '#39e6d0'; fg.shadowColor = '#39e6d0'; fg.shadowBlur = 22;
+    fg.fillStyle = '#5ec4b8'; fg.shadowColor = '#5ec4b8'; fg.shadowBlur = 22;
     const w = 54, h = closed ? 10 : 60, y = closed ? 62 : 34;
     const rr = (g, x, y, w, h, r) => {
       g.beginPath(); g.moveTo(x + r, y);

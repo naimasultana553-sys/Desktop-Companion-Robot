@@ -565,6 +565,25 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 .warning-box p:last-child { margin-bottom: 0; }
 
+.real-robot-compare {
+  text-align: center;
+}
+.real-robot-img {
+  width: 100%;
+  max-width: 280px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  margin: 10px auto;
+  display: block;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.real-robot-caption {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 6px;
+}
+
 /* ============================================================
    SIMULATION LABEL
    ============================================================ */
