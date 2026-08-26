@@ -252,7 +252,15 @@ function runBootSequence() {
 // SECTION 3: INTRO SCREEN
 // ============================================================
 
-let introScene, introCamera, introRenderer, introRobot;
+let introScene, introCamera, introRenderer, introRobot, introHead;
+let introSkipped = false;
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function skipIntro() {
+  if (introSkipped) return;
+  introSkipped = true;
+  transitionToSite();
+}
 
 function showIntro() {
   const introScreen = document.getElementById('intro-screen');
@@ -260,28 +268,126 @@ function showIntro() {
 
   initIntro3D();
 
-  setTimeout(() => {
-    document.getElementById('dialogue-2').classList.remove('hidden');
-  }, 1200);
+  if (prefersReducedMotion) {
+    // Skip straight to end state — no entrance animation
+    introRobot.scale.set(1, 1, 1);
+    introRobot.position.y = 0;
+    showIntroUI();
+  } else {
+    // Phase 1: Entrance animation (~1.5s)
+    introRobot.scale.set(0.01, 0.01, 0.01);
+    introRobot.position.y = -3;
+    tweenIntro(1500, (t) => {
+      // Ease-out back (slight overshoot)
+      const ease = 1 - Math.pow(1 - t, 3);
+      const bounce = t < 0.7 ? ease : ease + 0.04 * Math.sin((t - 0.7) * Math.PI / 0.3);
+      introRobot.scale.setScalar(Math.min(bounce, 1.04));
+      introRobot.position.y = -3 * (1 - ease);
+    }, () => {
+      // Snap to exact final values
+      introRobot.scale.set(1, 1, 1);
+      introRobot.position.y = 0;
+      // Phase 2: Greeting animation
+      playGreeting(() => {
+        // Phase 3: Show UI
+        showIntroUI();
+      });
+    });
+  }
 
-  setTimeout(() => {
-    document.getElementById('intro-actions').classList.remove('hidden');
-  }, 2200);
+  // Skip button / click-anywhere
+  document.getElementById('btn-skip').addEventListener('click', skipIntro);
+  introScreen.addEventListener('click', (e) => {
+    if (e.target === introScreen || e.target.id === 'intro-stage' || e.target.id === 'intro-robot-canvas') {
+      skipIntro();
+    }
+  });
+}
 
-  document.getElementById('btn-show-me').addEventListener('click', () => {
-    transitionToSite();
-  });
-  document.getElementById('btn-explore').addEventListener('click', () => {
-    transitionToSite();
-  });
-  document.getElementById('btn-skip').addEventListener('click', () => {
-    transitionToSite();
-  });
+function showIntroUI() {
+  if (introSkipped) return;
+  // Show bubble
+  document.getElementById('intro-bubble').classList.remove('hidden');
+  // Stagger buttons
+  setTimeout(() => {
+    if (introSkipped) return;
+    document.getElementById('btn-show-me').classList.add('visible');
+  }, 400);
+  setTimeout(() => {
+    if (introSkipped) return;
+    document.getElementById('btn-explore').classList.add('visible');
+  }, 700);
+  setTimeout(() => {
+    if (introSkipped) return;
+    document.getElementById('btn-skip').classList.add('visible');
+  }, 1000);
+
+  // Button handlers
+  document.getElementById('btn-show-me').addEventListener('click', skipIntro);
+  document.getElementById('btn-explore').addEventListener('click', skipIntro);
+}
+
+function playGreeting(onDone) {
+  if (introSkipped || !introHead) { if (onDone) onDone(); return; }
+  // Tilt head right
+  const startRot = introHead.rotation.z;
+  const targetTilt = 0.12;
+  const dur = 400;
+  const startTime = performance.now();
+
+  function tiltAnim(now) {
+    if (introSkipped) return;
+    const t = Math.min(1, (now - startTime) / dur);
+    const ease = 1 - Math.pow(1 - t, 2);
+    introHead.rotation.z = startRot + targetTilt * ease;
+    if (t < 1) { requestAnimationFrame(tiltAnim); }
+    else {
+      // Tilt back + blink
+      setTimeout(() => {
+        if (introSkipped) return;
+        blinkIntro();
+        // Tilt back
+        const backStart = performance.now();
+        function tiltBack(now) {
+          if (introSkipped) return;
+          const t2 = Math.min(1, (now - backStart) / 400);
+          introHead.rotation.z = targetTilt * (1 - t2);
+          if (t2 < 1) requestAnimationFrame(tiltBack);
+          else if (onDone) onDone();
+        }
+        requestAnimationFrame(tiltBack);
+      }, 300);
+    }
+  }
+  requestAnimationFrame(tiltAnim);
+}
+
+function blinkIntro() {
+  if (introSkipped) return;
+  const eyes = introRobot ? introRobot.children.filter(c => c.userData && c.userData.introEye) : [];
+  if (eyes.length === 0) return;
+  const origScaleY = eyes[0].scale.y;
+  eyes.forEach(e => e.scale.y = 0.1);
+  setTimeout(() => {
+    eyes.forEach(e => e.scale.y = origScaleY);
+  }, 150);
+}
+
+function tweenIntro(duration, onTick, onDone) {
+  const startTime = performance.now();
+  function step(now) {
+    if (introSkipped) return;
+    const t = Math.min(1, (now - startTime) / duration);
+    onTick(t);
+    if (t < 1) requestAnimationFrame(step);
+    else if (onDone) onDone();
+  }
+  requestAnimationFrame(step);
 }
 
 function initIntro3D() {
   const canvas = document.getElementById('intro-robot-canvas');
-  const container = document.getElementById('intro-robot-container');
+  const container = document.getElementById('intro-stage');
 
   introScene = new THREE.Scene();
   introScene.background = new THREE.Color(0x0B0E14);
@@ -290,7 +396,7 @@ function initIntro3D() {
   introCamera.position.set(0, 5, 18);
 
   introRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  introRenderer.setSize(300, 300);
+  introRenderer.setSize(320, 320);
   introRenderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
   introScene.add(new THREE.HemisphereLight(0xbfd4ff, 0x20242c, 1.2));
@@ -301,9 +407,15 @@ function initIntro3D() {
   introRobot = buildIntroRobot();
   introScene.add(introRobot);
 
+  // Idle rotation
+  let idleBob = 0;
   function animateIntro() {
     requestAnimationFrame(animateIntro);
-    introRobot.rotation.y += 0.008;
+    if (!introSkipped) {
+      introRobot.rotation.y += 0.008;
+      idleBob += 0.02;
+      introRobot.position.y += Math.sin(idleBob) * 0.002;
+    }
     introRenderer.render(introScene, introCamera);
   }
   animateIntro();
@@ -340,15 +452,20 @@ function buildIntroRobot() {
 
   // Head body
   const head = B(5.2, 4.6, 4.8, shell, 0, 5.8, 0.3, root);
+  introHead = head;
 
   // Screen face (dark recessed area)
   B(4.2, 3.0, 0.3, screenMat, 0, 6.0, 2.68, root);
 
-  // Eyes — bright teal glow with ambient surround
+  // Eyes — bright teal glow with ambient surround (tagged for blink)
+  const eyeL = B(0.8, 0.8, 0.08, eyeGlow, -0.9, 6.2, 2.92, root);
+  const eyeR = B(0.8, 0.8, 0.08, eyeGlow, 0.9, 6.2, 2.92, root);
+  eyeL.userData.introEye = true;
+  eyeR.userData.introEye = true;
+
+  // Ambient surrounds
   B(1.2, 1.2, 0.1, eyeAmbient, -0.9, 6.2, 2.85, root);
   B(1.2, 1.2, 0.1, eyeAmbient, 0.9, 6.2, 2.85, root);
-  B(0.8, 0.8, 0.08, eyeGlow, -0.9, 6.2, 2.92, root);
-  B(0.8, 0.8, 0.08, eyeGlow, 0.9, 6.2, 2.92, root);
 
   // Camera bump on top
   B(1.0, 0.6, 0.7, dark, 1.5, 8.35, 2.0, root);
@@ -1522,12 +1639,8 @@ function onResize() {
 // SECTION 15: INITIALIZATION
 // ============================================================
 
-// Check for reduced motion preference
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 // Start
 if (prefersReducedMotion) {
-  // Skip boot animation
   document.getElementById('boot-screen').classList.add('hidden');
   showIntro();
 } else {

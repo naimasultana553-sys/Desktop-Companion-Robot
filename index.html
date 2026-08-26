@@ -38,24 +38,28 @@
 
 <!-- ==================== INTRO SCREEN ==================== -->
 <div id="intro-screen" class="hidden" aria-label="Robot introduction">
-  <div id="intro-robot-container">
+  <!-- Dark stage — only the 3D canvas lives here -->
+  <div id="intro-stage">
     <canvas id="intro-robot-canvas"></canvas>
   </div>
-  <div id="intro-dialogue">
-    <div class="dialogue-bubble" id="dialogue-1">
-      <span class="dialogue-robot-icon">🤖</span>
-      Hi! I'm your Desktop Companion Robot.
-    </div>
-    <div class="dialogue-bubble hidden" id="dialogue-2">
-      <span class="dialogue-robot-icon">🤖</span>
-      Would you like to know how I work?
-    </div>
-    <div id="intro-actions" class="hidden">
-      <button class="btn-intro btn-primary" id="btn-show-me">YES, SHOW ME <span class="arrow">→</span></button>
-      <button class="btn-intro btn-secondary" id="btn-explore">EXPLORE MYSELF</button>
-      <button class="btn-intro btn-ghost" id="btn-skip">SKIP INTRO</button>
-    </div>
+
+  <!-- Speech bubble — appears after robot settles -->
+  <div id="intro-bubble" class="hidden">
+    <div class="bubble-tail"></div>
+    <p class="bubble-text">Hi! I'm your Desktop Companion Robot.<br><span class="bubble-sub">Would you like to know how I work?</span></p>
   </div>
+
+  <!-- Buttons — emerge from robot's sides -->
+  <button class="intro-btn intro-btn-left hidden" id="btn-show-me">
+    <span class="btn-label">YES, SHOW ME</span>
+    <span class="btn-arrow">→</span>
+  </button>
+  <button class="intro-btn intro-btn-right hidden" id="btn-explore">
+    <span class="btn-label">EXPLORE MYSELF</span>
+  </button>
+  <button class="intro-btn intro-btn-skip hidden" id="btn-skip">
+    SKIP INTRO
+  </button>
 </div>
 
 <!-- ==================== MAIN SITE ==================== -->
