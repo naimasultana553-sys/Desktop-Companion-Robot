@@ -1640,12 +1640,7 @@ function onResize() {
 // ============================================================
 
 // Start
-if (prefersReducedMotion) {
-  document.getElementById('boot-screen').classList.add('hidden');
-  showIntro();
-} else {
-  runBootSequence();
-}
+showIntro();
 
 // URL params for deep-linking
 const qp = new URLSearchParams(location.search);
