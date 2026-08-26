@@ -101,7 +101,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
    ============================================================ */
 #intro-screen {
   position: fixed; inset: 0; z-index: 900;
-  background: #000;
+  background: #ffffff;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
@@ -134,12 +134,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #111;
   margin-bottom: 10px;
 }
 .intro-subtitle {
   font-size: 0.95rem;
-  color: var(--text-secondary);
+  color: #555;
   margin-bottom: 32px;
 }
 #intro-actions {
@@ -163,18 +163,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 .btn-primary:hover { background: #5fded2; transform: translateY(-1px); box-shadow: 0 4px 20px var(--teal-glow); }
 .btn-secondary {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.12);
+  color: #333;
 }
 .btn-secondary:hover { border-color: var(--amber); color: var(--amber); }
 .btn-ghost {
-  color: var(--text-muted);
+  color: #999;
   background: none; border: none;
   font-size: 0.8rem;
   padding: 8px 16px;
 }
-.btn-ghost:hover { color: var(--text-secondary); }
+.btn-ghost:hover { color: #555; }
 .arrow { margin-left: 4px; }
 
 /* Responsive */
