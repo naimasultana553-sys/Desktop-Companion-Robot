@@ -966,8 +966,17 @@ function setupInteractions(tooltipEl) {
   renderer.domElement.addEventListener('click', (ev) => {
     const hit = pickAt(ev);
     const info = hit ? rootData(hit) : null;
-    if (!info) return;
-    if (info.comp) showComponentInfo(info.comp);
+    if (!info) {
+      setNetGlow(null, false); selectedNet = null;
+      focusCamera('reset');
+      setActivePanel('overview');
+      setActiveSidebar('overview');
+      return;
+    }
+    if (info.comp) {
+      showComponentInfo(info.comp);
+      focusCamera(info.comp);
+    }
     else selectNet(info.net, true);
   });
 
@@ -1020,6 +1029,35 @@ function selectNet(id, showInfo) {
 // ============================================================
 // SECTION 9: VIEWER CONTROLS
 // ============================================================
+
+const COMP_CAM = {
+  xiao: { p: [-13, 8, 0], t: [-13, 1.2, -6] },
+  oled: { p: [-2, 8, -1], t: [-2, 1.2, -7] },
+  pca:  { p: [11, 8, 5], t: [11, 1.2, -2] },
+  pan:  { p: [-8, 8, 14], t: [-8, 1, 7] },
+  tilt: { p: [-1, 8, 14], t: [-1, 1, 7] },
+  psu:  { p: [16, 8, 16], t: [16, 1.7, 9] },
+};
+
+function focusCamera(name) {
+  const v = name === 'reset'
+    ? { p: [2, 50, 65], t: [0, 2, 0] }
+    : COMP_CAM[name] || { p: [2, 50, 65], t: [0, 2, 0] };
+  const duration = 600;
+  const startPos = camera.position.clone();
+  const startTarget = controls.target.clone();
+  const endPos = new THREE.Vector3(...v.p);
+  const endTarget = new THREE.Vector3(...v.t);
+  const startTime = performance.now();
+  function anim(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const ease = 1 - Math.pow(1 - t, 3);
+    camera.position.lerpVectors(startPos, endPos, ease);
+    controls.target.lerpVectors(startTarget, endTarget, ease);
+    if (t < 1) requestAnimationFrame(anim);
+  }
+  requestAnimationFrame(anim);
+}
 
 function setupViewerControls() {
   const views = {
