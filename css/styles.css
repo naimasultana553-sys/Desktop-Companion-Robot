@@ -119,7 +119,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   width: 340px;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  background: #fff;
+  box-shadow: 0 4px 30px rgba(255,255,255,0.08);
 }
 #intro-video {
   display: block;
