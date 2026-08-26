@@ -1067,7 +1067,7 @@ function setupViewerControls() {
     right: { p: [30, 8, 0], t: [0, 5, 0] },
     top: { p: [0, 40, 0.1], t: [0, 0, 0] },
     reset: { p: [0, 60, 90], t: [0, 3, 0] },
-    robot: { p: [30, 30, 50], t: [0, 8.5, 0] },
+    robot: { p: [0, 35, 65], t: [0, 7, 0] },
   };
 
   function setView(name) {
@@ -1168,7 +1168,7 @@ function setupModeToggle() {
       }
 
       // Update camera
-      const v = robotMode ? { p: [30, 30, 50], t: [0, 8.5, 0] } : { p: [0, 60, 90], t: [0, 3, 0] };
+      const v = robotMode ? { p: [0, 35, 65], t: [0, 7, 0] } : { p: [0, 60, 90], t: [0, 3, 0] };
       camera.position.set(...v.p);
       controls.target.set(...v.t);
 
