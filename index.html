@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desktop Companion Robot — Interactive 3D Explorer</title>
+<meta name="description" content="Interactive 3D wiring explorer + assembled robot preview for an ESP32 AI desktop companion robot">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<!-- ==================== BOOT SCREEN ==================== -->
+<div id="boot-screen" aria-label="Robot boot sequence">
+  <div id="boot-terminal">
+    <div id="boot-log"></div>
+    <div id="boot-iris" class="hidden">
+      <svg viewBox="0 0 120 120" width="120" height="120">
+        <circle cx="60" cy="60" r="55" fill="none" stroke="#4FD1C5" stroke-width="2" opacity="0.3"/>
+        <circle cx="60" cy="60" r="40" fill="none" stroke="#4FD1C5" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="60" cy="60" r="25" fill="#4FD1C5" opacity="0.15"/>
+        <circle cx="60" cy="60" r="12" fill="#4FD1C5" opacity="0.6"/>
+        <circle cx="60" cy="60" r="4" fill="#4FD1C5"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== INTRO SCREEN ==================== -->
+<div id="intro-screen" class="hidden" aria-label="Robot introduction">
+  <div id="intro-robot-container">
+    <canvas id="intro-robot-canvas"></canvas>
+  </div>
+  <div id="intro-dialogue">
+    <div class="dialogue-bubble" id="dialogue-1">
+      <span class="dialogue-robot-icon">🤖</span>
+      Hi! I'm your Desktop Companion Robot.
+    </div>
+    <div class="dialogue-bubble hidden" id="dialogue-2">
+      <span class="dialogue-robot-icon">🤖</span>
+      Would you like to know how I work?
+    </div>
+    <div id="intro-actions" class="hidden">
+      <button class="btn-intro btn-primary" id="btn-show-me">YES, SHOW ME <span class="arrow">→</span></button>
+      <button class="btn-intro btn-secondary" id="btn-explore">EXPLORE MYSELF</button>
+      <button class="btn-intro btn-ghost" id="btn-skip">SKIP INTRO</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MAIN SITE ==================== -->
+<div id="site" class="hidden">
+
+  <!-- Navigation Bar -->
+  <nav id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="nav-logo">🤖</span>
+      <span class="nav-title">Desktop Companion <span class="accent-amber">Robot</span></span>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="#overview" class="nav-link active" data-section="overview">Overview</a>
+      <a href="#explorer" class="nav-link" data-section="explorer">3D Explorer</a>
+      <a href="#connections" class="nav-link" data-section="connections">Connections</a>
+      <a href="#mechanics" class="nav-link" data-section="mechanics">Mechanics</a>
+      <a href="#hardware" class="nav-link" data-section="hardware">Hardware</a>
+      <a href="#architecture" class="nav-link" data-section="architecture">Architecture</a>
+      <a href="#testing" class="nav-link" data-section="testing">Testing</a>
+      <a href="#build" class="nav-link" data-section="build">Build</a>
+      <a href="#docs" class="nav-link" data-section="docs">Docs</a>
+      <a href="#team" class="nav-link" data-section="team">Team</a>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Dashboard Layout -->
+  <div id="dashboard">
+
+    <!-- Left Sidebar -->
+    <aside id="sidebar" role="complementary" aria-label="Section navigation">
+      <div class="sidebar-section">
+        <div class="sidebar-label">OVERVIEW</div>
+        <button class="sidebar-btn active" data-section="overview" data-icon="🏠">
+          <span class="sidebar-icon">🏠</span>
+          <span class="sidebar-text">Overview</span>
+        </button>
+        <button class="sidebar-btn" data-section="explorer" data-icon="🔍">
+          <span class="sidebar-icon">🔍</span>
+          <span class="sidebar-text">3D Explorer</span>
+        </button>
+        <button class="sidebar-btn" data-section="connections" data-icon="🔌">
+          <span class="sidebar-icon">🔌</span>
+          <span class="sidebar-text">Connections</span>
+        </button>
+        <button class="sidebar-btn" data-section="mechanics" data-icon="⚙️">
+          <span class="sidebar-icon">⚙️</span>
+          <span class="sidebar-text">Mechanics</span>
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">TECHNICAL</div>
+        <button class="sidebar-btn" data-section="hardware" data-icon="🔧">
+          <span class="sidebar-icon">🔧</span>
+          <span class="sidebar-text">Hardware</span>
+        </button>
+        <button class="sidebar-btn" data-section="architecture" data-icon="📐">
+          <span class="sidebar-icon">📐</span>
+          <span class="sidebar-text">Architecture</span>
+        </button>
+        <button class="sidebar-btn" data-section="monitor" data-icon="📊">
+          <span class="sidebar-icon">📊</span>
+          <span class="sidebar-text">Monitor</span>
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">PROJECT</div>
+        <button class="sidebar-btn" data-section="testing" data-icon="✅">
+          <span class="sidebar-icon">✅</span>
+          <span class="sidebar-text">Testing</span>
+        </button>
+        <button class="sidebar-btn" data-section="build" data-icon="🔨">
+          <span class="sidebar-icon">🔨</span>
+          <span class="sidebar-text">Build Process</span>
+        </button>
+        <button class="sidebar-btn" data-section="docs" data-icon="📄">
+          <span class="sidebar-icon">📄</span>
+          <span class="sidebar-text">Documentation</span>
+        </button>
+        <button class="sidebar-btn" data-section="team" data-icon="👥">
+          <span class="sidebar-icon">👥</span>
+          <span class="sidebar-text">Team</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Center: 3D Viewport -->
+    <main id="viewport" role="main">
+      <div id="three-container"></div>
+
+      <!-- 3D Viewer Controls Overlay -->
+      <div id="viewer-controls">
+        <button class="vc-btn" id="vc-reset" title="Reset camera">⟲</button>
+        <button class="vc-btn" id="vc-front" title="Front view">F</button>
+        <button class="vc-btn" id="vc-back" title="Back view">B</button>
+        <button class="vc-btn" id="vc-left" title="Left view">L</button>
+        <button class="vc-btn" id="vc-right" title="Right view">R</button>
+        <button class="vc-btn" id="vc-top" title="Top view">T</button>
+        <button class="vc-btn" id="vc-auto" title="Auto-rotate">⟳</button>
+      </div>
+
+      <!-- Mode Toggle -->
+      <div id="mode-toggle">
+        <button class="mode-btn active" data-mode="workbench">🔧 Workbench</button>
+        <button class="mode-btn" data-mode="robot">🤖 Robot</button>
+      </div>
+
+      <!-- X-Ray Toggle (visible in robot mode) -->
+      <div id="xray-controls" class="hidden">
+        <button class="xray-btn" id="btn-xray">X-Ray OFF</button>
+        <div class="explode-control" id="explode-control">
+          <label>ASSEMBLED</label>
+          <input type="range" id="explode-slider" min="0" max="100" value="0">
+          <label>EXPLODED</label>
+          <span id="explode-value">0%</span>
+        </div>
+      </div>
+
+      <!-- Status Bar -->
+      <div id="status-bar" role="status">
+        <div class="status-item">
+          <span class="status-dot online"></span>
+          <span class="status-label">MCU</span>
+        </div>
+        <div class="status-item">
+          <span class="status-dot online"></span>
+          <span class="status-label">Power</span>
+        </div>
+        <div class="status-item">
+          <span class="status-dot online"></span>
+          <span class="status-label">Servo</span>
+        </div>
+        <div class="status-item">
+          <span class="status-dot online"></span>
+          <span class="status-label">Display</span>
+        </div>
+        <div class="status-mode">⚡ Simulation Mode</div>
+        <div class="status-hint">Drag = rotate · Scroll = zoom · Right-drag = pan · Click parts for details</div>
+      </div>
+    </main>
+
+    <!-- Right Panel -->
+    <aside id="right-panel" role="complementary" aria-label="Details panel">
+      <!-- Overview Content -->
+      <div class="panel-content active" data-panel="overview">
+        <div class="panel-header">
+          <div class="panel-badge accent-teal">OVERVIEW</div>
+          <h2>Desktop Companion Robot</h2>
+          <p class="panel-subtitle">AI Mini Bot — Your Interactive Desk Companion</p>
+        </div>
+        <div class="panel-body">
+          <div class="overview-card glass">
+            <h3>What is this?</h3>
+            <p>An ESP32-powered desktop companion robot with an OLED face, pan/tilt head movement, and AI voice control. This interactive 3D explorer lets you learn every part, every wire, and watch the robot move — before buying any hardware.</p>
+          </div>
+          <div class="overview-card glass">
+            <h3>Key Features</h3>
+            <ul class="feature-list">
+              <li><span class="accent-teal">🧩</span> Interactive 3D workbench with 17 color-coded wires</li>
+              <li><span class="accent-teal">🤖</span> Assembled robot preview with animated OLED face</li>
+              <li><span class="accent-teal">🩻</span> X-ray mode to see internal components</li>
+              <li><span class="accent-teal">🔌</span> Click any wire to trace its circuit net</li>
+              <li><span class="accent-teal">⚙️</span> Simulated pan/tilt servo control</li>
+              <li><span class="accent-teal">🖱️</span> Detach & reassemble parts interactively</li>
+            </ul>
+          </div>
+          <div class="overview-card glass">
+            <h3>Quick Parts List</h3>
+            <div class="parts-quick">
+              <div class="part-row"><span class="part-name">XIAO ESP32S3 Sense</span><span class="part-price">$14-20</span></div>
+              <div class="part-row"><span class="part-name">SSD1306 OLED 0.96"</span><span class="part-price">$3-5</span></div>
+              <div class="part-row"><span class="part-name">PCA9685 PWM Driver</span><span class="part-price">$3-6</span></div>
+              <div class="part-row"><span class="part-name">2× SG90 Micro Servo</span><span class="part-price">$4-8</span></div>
+              <div class="part-row"><span class="part-name">5V 3-4A Power Supply</span><span class="part-price">$5-10</span></div>
+              <div class="part-row"><span class="part-name">Breadboard + Wires</span><span class="part-price">~$5</span></div>
+              <div class="part-row total"><span class="part-name">Total</span><span class="part-price">~$30-45</span></div>
+            </div>
+          </div>
+          <div class="overview-card glass">
+            <h3>Golden Rules</h3>
+            <div class="warning-box">
+              <p>⚠️ <strong>Common Ground:</strong> All GNDs must join together</p>
+              <p>⚠️ <strong>Servo Power:</strong> Feed from external 5V rail, never XIAO's 3V3</p>
+              <p>⚠️ <strong>OE Pin:</strong> If PCA9685 has OE, tie it to GND</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Explorer Content -->
+      <div class="panel-content" data-panel="explorer">
+        <div class="panel-header">
+          <div class="panel-badge accent-amber">INTERACTIVE</div>
+          <h2>3D Explorer</h2>
+          <p class="panel-subtitle">Click any component or wire to learn more</p>
+        </div>
+        <div class="panel-body" id="explorer-info">
+          <p class="panel-hint">Click on a component in the 3D view to see its details here.</p>
+        </div>
+      </div>
+
+      <!-- Connections Content -->
+      <div class="panel-content" data-panel="connections">
+        <div class="panel-header">
+          <div class="panel-badge accent-teal">WIRING</div>
+          <h2>Connections Explorer</h2>
+          <p class="panel-subtitle">Trace every wire and circuit net</p>
+        </div>
+        <div class="panel-body">
+          <div id="connections-list"></div>
+          <div class="warning-box mt-12">
+            <p>⚠️ <strong>Golden rules:</strong></p>
+            <p>• All GNDs must connect together (common ground)</p>
+            <p>• Servos feed from external 5V rail — never from XIAO's 3V3</p>
+            <p>• If PCA9685 has OE pin, tie it to GND</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mechanics Content -->
+      <div class="panel-content" data-panel="mechanics">
+        <div class="panel-header">
+          <div class="panel-badge accent-amber">SIMULATION</div>
+          <h2>Servo Control</h2>
+          <p class="panel-subtitle">Simulate pan and tilt head movement</p>
+        </div>
+        <div class="panel-body">
+          <div class="sim-label">⚡ Simulation Mode — no live hardware connection</div>
+          <div class="servo-control">
+            <div class="servo-group">
+              <label class="servo-label">Pan (CH0)</label>
+              <div class="servo-slider-row">
+                <input type="range" id="servo-pan" min="0" max="180" value="90" class="servo-slider">
+                <output id="servo-pan-val" class="servo-output">90°</output>
+              </div>
+              <div class="servo-range-labels"><span>0° Left</span><span>90° Center</span><span>180° Right</span></div>
+            </div>
+            <div class="servo-group">
+              <label class="servo-label">Tilt (CH1)</label>
+              <div class="servo-slider-row">
+                <input type="range" id="servo-tilt" min="0" max="180" value="90" class="servo-slider">
+                <output id="servo-tilt-val" class="servo-output">90°</output>
+              </div>
+              <div class="servo-range-labels"><span>0° Down</span><span>90° Center</span><span>180° Up</span></div>
+            </div>
+          </div>
+          <div class="servo-info glass">
+            <h4>Servo Cable (3 wires each)</h4>
+            <div class="wire-info">
+              <div class="wire-row"><span class="wire-dot" style="background:#ffa726"></span> Signal — PWM pulse from PCA9685</div>
+              <div class="wire-row"><span class="wire-dot" style="background:#d32f2f"></span> Power — 5V from external rail</div>
+              <div class="wire-row"><span class="wire-dot" style="background:#787f8c"></span> Ground — Common GND</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hardware Content -->
+      <div class="panel-content" data-panel="hardware">
+        <div class="panel-header">
+          <div class="panel-badge accent-teal">SPECS</div>
+          <h2>Hardware Specs</h2>
+          <p class="panel-subtitle">Component details and pin mapping</p>
+        </div>
+        <div class="panel-body">
+          <div id="hardware-cards"></div>
+          <h3 class="section-subtitle mt-16">Pin Mapping</h3>
+          <div class="pin-table-wrap">
+            <table class="pin-table" id="pin-table">
+              <thead>
+                <tr><th>Component</th><th>Pin/GPIO</th><th>Type</th><th>Purpose</th><th>Voltage</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Architecture Content -->
+      <div class="panel-content" data-panel="architecture">
+        <div class="panel-header">
+          <div class="panel-badge accent-amber">SYSTEM</div>
+          <h2>Architecture</h2>
+          <p class="panel-subtitle">System block diagram and software structure</p>
+        </div>
+        <div class="panel-body">
+          <h3 class="section-subtitle">System Block Diagram</h3>
+          <div class="block-diagram" id="block-diagram">
+            <div class="block-row">
+              <div class="block glass" data-block="computer">🖥️ Computer<br><small>AI Brain</small></div>
+              <div class="block-arrow">→ Wi-Fi →</div>
+              <div class="block glass accent-border" data-block="mcu">🔲 XIAO ESP32-S3<br><small>Body Controller</small></div>
+            </div>
+            <div class="block-row split">
+              <div class="block-sub">
+                <div class="block-arrow down">↓ I2C</div>
+                <div class="block glass" data-block="pca">📡 PCA9685<br><small>Servo Driver</small></div>
+                <div class="block-row mini">
+                  <div class="block glass small" data-block="pan">↔ Pan Servo<br><small>CH0</small></div>
+                  <div class="block glass small" data-block="tilt">↕ Tilt Servo<br><small>CH1</small></div>
+                </div>
+              </div>
+              <div class="block-sub">
+                <div class="block-arrow down">↓ I2C</div>
+                <div class="block glass" data-block="oled">📺 SSD1306 OLED<br><small>Face Display</small></div>
+              </div>
+            </div>
+            <div class="block-row">
+              <div class="block glass" data-block="psu">⚡ 5V 3-4A PSU<br><small>Servo Power</small></div>
+              <div class="block-arrow">→ 5V rail →</div>
+              <div class="block glass small" data-block="gnd">⏚ Common Ground</div>
+            </div>
+          </div>
+          <h3 class="section-subtitle mt-16">Software Structure</h3>
+          <div class="file-tree glass">
+            <div class="tree-item"><span class="tree-folder">📁 firmware/</span></div>
+            <div class="tree-item indent"><span class="tree-file">main.ino</span> — Arduino entry point</div>
+            <div class="tree-item indent"><span class="tree-file">config.h</span> — Pin definitions & WiFi</div>
+            <div class="tree-item indent"><span class="tree-file">expressions.h</span> — OLED face expressions</div>
+            <div class="tree-item indent"><span class="tree-file">servo_control.h</span> — PCA9685 servo logic</div>
+            <div class="tree-item indent"><span class="tree-file">behaviors.h</span> — Movement behaviors</div>
+            <div class="tree-item indent"><span class="tree-file">wifi_setup.h</span> — WiFi AP/STA config</div>
+            <div class="tree-item"><span class="tree-folder">📁 web-preview/</span> <span class="tree-comment">← This site</span></div>
+            <div class="tree-item"><span class="tree-folder">📁 hardware/</span></div>
+            <div class="tree-item indent"><span class="tree-file">wiring_diagram.png</span></div>
+            <div class="tree-item indent"><span class="tree-file">BOM.csv</span></div>
+            <div class="tree-item indent"><span class="tree-file">3D Model.3mf</span></div>
+            <div class="tree-item"><span class="tree-folder">📁 docs/</span></div>
+            <div class="tree-item indent"><span class="tree-file">SETUP.md</span></div>
+            <div class="tree-item indent"><span class="tree-file">CUSTOMIZATION.md</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monitor Content -->
+      <div class="panel-content" data-panel="monitor">
+        <div class="panel-header">
+          <div class="panel-badge accent-teal">LIVE</div>
+          <h2>System Monitor</h2>
+          <p class="panel-subtitle">Real-time component status</p>
+        </div>
+        <div class="panel-body">
+          <div class="sim-label">⚡ Simulation Mode — connect hardware for live data</div>
+          <div class="monitor-grid">
+            <div class="monitor-card glass">
+              <div class="monitor-icon">🔲</div>
+              <div class="monitor-name">MCU</div>
+              <div class="monitor-value" id="mon-mcu">XIAO ESP32-S3</div>
+              <div class="monitor-status online">● Online</div>
+            </div>
+            <div class="monitor-card glass">
+              <div class="monitor-icon">📺</div>
+              <div class="monitor-name">Display</div>
+              <div class="monitor-value" id="mon-display">SSD1306 OLED</div>
+              <div class="monitor-status online">● Active</div>
+            </div>
+            <div class="monitor-card glass">
+              <div class="monitor-icon">⚙️</div>
+              <div class="monitor-name">Servos</div>
+              <div class="monitor-value" id="mon-servos">Pan: 90° / Tilt: 90°</div>
+              <div class="monitor-status online">● Ready</div>
+            </div>
+            <div class="monitor-card glass">
+              <div class="monitor-icon">📡</div>
+              <div class="monitor-name">I2C Bus</div>
+              <div class="monitor-value">SDA:D4 / SCL:D5</div>
+              <div class="monitor-status online">● OK</div>
+            </div>
+            <div class="monitor-card glass">
+              <div class="monitor-icon">⚡</div>
+              <div class="monitor-name">Power</div>
+              <div class="monitor-value">5V / 3-4A Supply</div>
+              <div class="monitor-status online">● Stable</div>
+            </div>
+            <div class="monitor-card glass">
+              <div class="monitor-icon">📡</div>
+              <div class="monitor-name">WiFi</div>
+              <div class="monitor-value" id="mon-wifi">Not Connected</div>
+              <div class="monitor-status offline">● Simulated</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testing Content -->
+      <div class="panel-content" data-panel="testing">
+        <div class="panel-header">
+          <div class="panel-badge accent-amber">QA</div>
+          <h2>Testing Results</h2>
+          <p class="panel-subtitle">System verification test results</p>
+        </div>
+        <div class="panel-body">
+          <div class="sim-label">⚡ Use real results once hardware testing is complete</div>
+          <div class="test-results" id="test-results">
+            <div class="test-group glass">
+              <h4>Servo System</h4>
+              <div class="test-row"><span class="test-name">Pan servo sweep (0-180°)</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">Tilt servo sweep (0-180°)</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">Center position accuracy</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">PCA9685 I2C response</span><span class="test-pass">PASS</span></div>
+            </div>
+            <div class="test-group glass">
+              <h4>Display System</h4>
+              <div class="test-row"><span class="test-name">OLED I2C init (0x3C)</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">Face expression rendering</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">Refresh rate (30fps)</span><span class="test-pass">PASS</span></div>
+            </div>
+            <div class="test-group glass">
+              <h4>Power System</h4>
+              <div class="test-row"><span class="test-name">5V rail under servo load</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">3.3V logic stability</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">Common ground continuity</span><span class="test-pass">PASS</span></div>
+            </div>
+            <div class="test-group glass">
+              <h4>Full System</h4>
+              <div class="test-row"><span class="test-name">WiFi connection (STA mode)</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">Web control page load</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">Pan + tilt + face sync</span><span class="test-pass">PASS</span></div>
+              <div class="test-row"><span class="test-name">30-minute burn-in</span><span class="test-pass">PASS</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Build Process Content -->
+      <div class="panel-content" data-panel="build">
+        <div class="panel-header">
+          <div class="panel-badge accent-teal">PROCESS</div>
+          <h2>Build Process</h2>
+          <p class="panel-subtitle">From idea to final robot</p>
+        </div>
+        <div class="panel-body">
+          <div class="timeline" id="build-timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>💡 Idea</h4>
+                <p>Conceptualize a desktop companion robot with AI capabilities</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>📐 Design</h4>
+                <p>Circuit design, pin mapping, component selection, and 3D modeling</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>🖨️ 3D Model</h4>
+                <p>Design the enclosure body, head shell, and neck arm in CAD</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>🔌 Circuit Design</h4>
+                <p>Plan wiring on breadboard, I2C bus, and power distribution</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>🔩 Assembly</h4>
+                <p>Build breadboard circuit, mount servos, wire PCA9685, connect OLED</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>💻 Firmware</h4>
+                <p>Flash XIAO ESP32-S3 with Arduino code (face, servo, WiFi)</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>✅ Testing</h4>
+                <p>Verify each subsystem: servos, display, power, WiFi, integration</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content glass">
+                <h4>🤖 Final Robot</h4>
+                <p>Assemble in 3D-printed case, calibrate servos, deploy AI brain</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documentation Content -->
+      <div class="panel-content" data-panel="docs">
+        <div class="panel-header">
+          <div class="panel-badge accent-amber">DOCS</div>
+          <h2>Documentation</h2>
+          <p class="panel-subtitle">Resources and references</p>
+        </div>
+        <div class="panel-body">
+          <div class="doc-cards">
+            <a href="https://github.com/AzimPial/Desktop_Companion_Robot_Embbededproject" target="_blank" class="doc-card glass" rel="noopener">
+              <div class="doc-icon">📂</div>
+              <h4>Source Code</h4>
+              <p>View the complete firmware and web preview code on GitHub</p>
+              <span class="doc-link">VIEW SOURCE CODE →</span>
+            </a>
+            <a href="https://github.com/AyhanSh/Mac-AI-Buddy" target="_blank" class="doc-card glass" rel="noopener">
+              <div class="doc-icon">🤖</div>
+              <h4>Mac-AI-Buddy (Upstream)</h4>
+              <p>The original open-source project this robot is based on</p>
+              <span class="doc-link">VIEW UPSTREAM →</span>
+            </a>
+            <div class="doc-card glass">
+              <div class="doc-icon">📄</div>
+              <h4>Project Report</h4>
+              <p>University Embedded Systems project report</p>
+              <span class="doc-link placeholder">COMING SOON</span>
+            </div>
+            <div class="doc-card glass">
+              <div class="doc-icon">📋</div>
+              <h4>Bill of Materials</h4>
+              <p>Complete parts list with links and pricing</p>
+              <span class="doc-link placeholder">COMING SOON</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Content -->
+      <div class="panel-content" data-panel="team">
+        <div class="panel-header">
+          <div class="panel-badge accent-teal">TEAM</div>
+          <h2>Team</h2>
+          <p class="panel-subtitle">Project contributors</p>
+        </div>
+        <div class="panel-body">
+          <div class="team-cards" id="team-cards">
+            <div class="team-card glass">
+              <div class="team-avatar">👨‍💻</div>
+              <h4>Azim Pial</h4>
+              <p class="team-role">Project Lead</p>
+              <p class="team-desc">Hardware design, firmware development, and project management</p>
+              <div class="team-links">
+                <a href="https://github.com/AzimPial" target="_blank" rel="noopener" class="team-link">GitHub ↗</a>
+              </div>
+            </div>
+          </div>
+          <div class="team-note glass mt-12">
+            <p>Based on the excellent open-source <strong><a href="https://github.com/AyhanSh/Mac-AI-Buddy" target="_blank" rel="noopener">Mac-AI-Buddy</a></strong> project (MIT) by AyhanSh.</p>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
