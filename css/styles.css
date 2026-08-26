@@ -149,154 +149,74 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 #intro-screen {
   position: fixed; inset: 0; z-index: 900;
   background: var(--bg-primary);
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-
-/* Dark stage — robot canvas fills center */
-#intro-stage {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 320px; height: 320px;
-}
-#intro-robot-canvas {
+#intro-video {
+  position: absolute; inset: 0;
   width: 100%; height: 100%;
-  border-radius: 16px;
+  object-fit: cover;
 }
-
-/* Speech bubble — anchored below robot, fades in */
-#intro-bubble {
-  position: absolute;
-  top: calc(50% + 180px); left: 50%;
-  transform: translateX(-50%);
-  max-width: 420px; width: max-content;
+#intro-overlay {
+  position: relative; z-index: 2;
   text-align: center;
+  padding: 40px;
+  animation: introFadeIn 1s var(--ease) forwards;
   opacity: 0;
-  animation: bubbleIn 0.6s var(--ease) forwards;
 }
-.bubble-tail {
-  width: 12px; height: 12px;
-  background: var(--bg-glass);
-  border-left: 1px solid var(--border);
-  border-top: 1px solid var(--border);
-  transform: rotate(45deg);
-  margin: -7px auto 0;
+@keyframes introFadeIn {
+  to { opacity: 1; }
 }
-.bubble-text {
-  background: var(--bg-glass);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px 24px;
-  font-size: 1.05rem;
+.intro-title {
   font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.5;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
-.bubble-sub {
-  display: block;
-  margin-top: 6px;
-  font-size: 0.88rem;
+.intro-subtitle {
+  font-size: 1rem;
   color: var(--text-secondary);
+  margin-bottom: 32px;
+  text-shadow: 0 1px 10px rgba(0,0,0,0.5);
 }
-@keyframes bubbleIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+#intro-actions {
+  display: flex; gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
-
-/* Buttons — emerge from robot sides */
-.intro-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 12px 22px;
-  border-radius: 12px;
-  font-size: 0.85rem;
+.btn-intro {
+  padding: 13px 28px;
+  border-radius: 10px;
+  font-size: 0.9rem;
   font-weight: 600;
   font-family: var(--font-display);
   letter-spacing: 0.5px;
-  white-space: nowrap;
   cursor: pointer;
   transition: all var(--duration) var(--ease);
-  z-index: 10;
-  /* Hidden state for animation */
-  opacity: 0;
-  pointer-events: none;
 }
-.intro-btn.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Left button — slides from left */
-.intro-btn-left {
-  right: calc(50% + 190px);
+.btn-primary {
   background: var(--teal);
   color: var(--bg-primary);
-  transform: translateY(-50%) translateX(-30px);
 }
-.intro-btn-left.visible {
-  transform: translateY(-50%) translateX(0);
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
-}
-.intro-btn-left:hover {
-  background: #5fded2;
-  box-shadow: 0 4px 20px var(--teal-glow);
-  transform: translateY(-50%) translateX(0) translateY(-2px);
-}
-
-/* Right button — slides from right */
-.intro-btn-right {
-  left: calc(50% + 190px);
-  background: var(--bg-glass);
+.btn-primary:hover { background: #5fded2; transform: translateY(-1px); box-shadow: 0 4px 20px var(--teal-glow); }
+.btn-secondary {
+  background: rgba(11, 14, 20, 0.7);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  transform: translateY(-50%) translateX(30px);
+  backdrop-filter: blur(8px);
 }
-.intro-btn-right.visible {
-  transform: translateY(-50%) translateX(0);
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
-}
-.intro-btn-right:hover {
-  border-color: var(--amber);
-  color: var(--amber);
-  transform: translateY(-50%) translateX(0) translateY(-2px);
-}
-
-/* Skip — fades in at bottom */
-.intro-btn-skip {
-  top: auto; bottom: 40px; left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  background: none;
-  border: none;
+.btn-secondary:hover { border-color: var(--amber); color: var(--amber); }
+.btn-ghost {
   color: var(--text-muted);
-  font-size: 0.78rem;
+  background: none; border: none;
+  font-size: 0.8rem;
   padding: 8px 16px;
 }
-.intro-btn-skip.visible {
-  transform: translateX(-50%) translateY(0);
-  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
-}
-.intro-btn-skip:hover { color: var(--text-secondary); }
-
-.btn-arrow { margin-left: 6px; }
-
-/* ============================================================
-   REDUCED MOTION — skip all entrance animations
-   ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  #intro-bubble {
-    animation: none;
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  .intro-btn {
-    transition: none !important;
-    transform: translateY(-50%) translateX(0) !important;
-  }
-  .intro-btn-skip {
-    transform: translateX(-50%) translateY(0) !important;
-  }
-}
+.btn-ghost:hover { color: var(--text-secondary); }
+.arrow { margin-left: 4px; }
 
 /* ============================================================
    NAVIGATION

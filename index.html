@@ -21,29 +21,19 @@
 <body>
 
 <!-- ==================== INTRO SCREEN ==================== -->
-<div id="intro-screen" class="hidden" aria-label="Robot introduction">
-  <!-- Dark stage — only the 3D canvas lives here -->
-  <div id="intro-stage">
-    <canvas id="intro-robot-canvas"></canvas>
+<div id="intro-screen" aria-label="Robot introduction">
+  <video id="intro-video" autoplay muted loop playsinline>
+    <source src="Ui.mp4" type="video/mp4">
+  </video>
+  <div id="intro-overlay">
+    <h1 class="intro-title">Desktop Companion <span class="accent-amber">Robot</span></h1>
+    <p class="intro-subtitle">Interactive 3D Explorer for ESP32 AI Desktop Companion</p>
+    <div id="intro-actions">
+      <button class="btn-intro btn-primary" id="btn-show-me">YES, SHOW ME <span class="arrow">→</span></button>
+      <button class="btn-intro btn-secondary" id="btn-explore">EXPLORE MYSELF</button>
+    </div>
+    <button class="btn-intro btn-ghost" id="btn-skip">SKIP INTRO</button>
   </div>
-
-  <!-- Speech bubble — appears after robot settles -->
-  <div id="intro-bubble" class="hidden">
-    <div class="bubble-tail"></div>
-    <p class="bubble-text">Hi! I'm your Desktop Companion Robot.<br><span class="bubble-sub">Would you like to know how I work?</span></p>
-  </div>
-
-  <!-- Buttons — emerge from robot's sides -->
-  <button class="intro-btn intro-btn-left hidden" id="btn-show-me">
-    <span class="btn-label">YES, SHOW ME</span>
-    <span class="btn-arrow">→</span>
-  </button>
-  <button class="intro-btn intro-btn-right hidden" id="btn-explore">
-    <span class="btn-label">EXPLORE MYSELF</span>
-  </button>
-  <button class="intro-btn intro-btn-skip hidden" id="btn-skip">
-    SKIP INTRO
-  </button>
 </div>
 
 <!-- ==================== MAIN SITE ==================== -->
