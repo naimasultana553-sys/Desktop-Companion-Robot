@@ -97,53 +97,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
 /* ============================================================
-   BOOT SCREEN
-   ============================================================ */
-#boot-screen {
-  position: fixed; inset: 0; z-index: 1000;
-  background: var(--bg-primary);
-  display: flex; align-items: center; justify-content: center;
-}
-#boot-terminal {
-  width: min(600px, 90vw);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--teal);
-}
-#boot-log {
-  min-height: 200px;
-}
-#boot-log .line {
-  opacity: 0;
-  animation: bootFadeIn 0.3s var(--ease) forwards;
-  line-height: 1.8;
-  white-space: nowrap;
-  overflow: hidden;
-}
-#boot-log .line .ok { color: #66bb6a; font-weight: 600; }
-#boot-log .line .ready { color: var(--amber); font-weight: 700; font-size: 15px; }
-#boot-log .line .dim { color: var(--text-muted); }
-
-#boot-iris {
-  display: flex;
-  justify-content: center;
-  margin-top: 40px;
-  opacity: 0;
-  transform: scale(0.3);
-  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
-}
-#boot-iris.show {
-  opacity: 1;
-  transform: scale(1);
-}
-#boot-iris svg { filter: drop-shadow(0 0 20px rgba(79, 209, 197, 0.4)); }
-
-@keyframes bootFadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ============================================================
    INTRO SCREEN
    ============================================================ */
 #intro-screen {
