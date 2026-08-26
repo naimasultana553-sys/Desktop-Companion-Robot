@@ -198,58 +198,7 @@ const PIN_LABELS = {
 };
 
 // ============================================================
-// SECTION 2: BOOT SEQUENCE
-// ============================================================
-
-const BOOT_LINES = [
-  { text: '> INITIALIZING COMPANION SYSTEM...', delay: 0 },
-  { text: '> MCU: Seeed XIAO ESP32S3 Sense ........... <span class="ok">OK</span>', delay: 300 },
-  { text: '> DISPLAY: SSD1306 OLED 0.96" I2C ......... <span class="ok">OK</span>', delay: 500 },
-  { text: '> SERVO DRIVER: PCA9685 PWM ............... <span class="ok">OK</span>', delay: 400 },
-  { text: '> ACTUATORS: Pan + Tilt SG90 .............. <span class="ok">OK</span>', delay: 400 },
-  { text: '> POWER: 5V External Rail ................. <span class="ok">OK</span>', delay: 350 },
-  { text: '> I2C BUS: D4(SDA) / D5(SCL) ............. <span class="ok">OK</span>', delay: 300 },
-  { text: '> WIFI: STA Mode Ready .................... <span class="ok">OK</span>', delay: 400 },
-  { text: '', delay: 200 },
-  { text: '> <span class="ready">ALL SYSTEMS READY — COMPANION ONLINE</span>', delay: 500 },
-  { text: '<span class="dim">  Desktop Companion Robot v1.0</span>', delay: 200 },
-];
-
-function runBootSequence() {
-  const logEl = document.getElementById('boot-log');
-  const irisEl = document.getElementById('boot-iris');
-  let cumulativeDelay = 0;
-
-  BOOT_LINES.forEach((line, i) => {
-    cumulativeDelay += line.delay;
-    setTimeout(() => {
-      const div = document.createElement('div');
-      div.className = 'line';
-      div.innerHTML = line.text || '&nbsp;';
-      div.style.animationDelay = '0s';
-      logEl.appendChild(div);
-    }, cumulativeDelay);
-  });
-
-  cumulativeDelay += 800;
-  setTimeout(() => {
-    irisEl.classList.remove('hidden');
-    requestAnimationFrame(() => irisEl.classList.add('show'));
-  }, cumulativeDelay);
-
-  cumulativeDelay += 2000;
-  setTimeout(() => {
-    document.getElementById('boot-screen').style.opacity = '0';
-    document.getElementById('boot-screen').style.transition = 'opacity 0.6s ease';
-    setTimeout(() => {
-      document.getElementById('boot-screen').classList.add('hidden');
-      showIntro();
-    }, 600);
-  }, cumulativeDelay);
-}
-
-// ============================================================
-// SECTION 3: INTRO SCREEN (video-based)
+// SECTION 2: INTRO SCREEN (video-based)
 // ============================================================
 
 let introSkipped = false;
