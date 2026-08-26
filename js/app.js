@@ -272,16 +272,16 @@ function initMainScene() {
 
   // Camera
   camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 300);
-  camera.position.set(2, 50, 65);
+  camera.position.set(0, 60, 90);
 
   // Controls
   controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 1.5, 0);
+  controls.target.set(0, 3, 0);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.maxPolarAngle = Math.PI * 0.49;
   controls.minDistance = 10;
-  controls.maxDistance = 120;
+  controls.maxDistance = 160;
 
   // CSS2D Renderer for labels
   labelRenderer = new CSS2DRenderer();
