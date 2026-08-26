@@ -803,17 +803,23 @@ function buildAssembledRobot() {
   const root = new THREE.Group();
   root.position.set(0, 0, -1);
 
-  // --- Materials ---
-  const shellMat = new THREE.MeshStandardMaterial({
-    color: 0xe8e4e0, roughness: 0.52, metalness: 0.03,
-    transparent: true, opacity: 1,
-  });
-  const accentMat = new THREE.MeshStandardMaterial({
-    color: 0x4FD1C5, roughness: 0.45, metalness: 0.06,
-    transparent: true, opacity: 1,
+  // 3D print layer lines bump
+  const bc = document.createElement('canvas');
+  bc.width = 4; bc.height = 64;
+  const bg = bc.getContext('2d');
+  for (let y = 0; y < 64; y += 2) { bg.fillStyle = y % 4 ? '#909090' : '#b4b4b4'; bg.fillRect(0, y, 4, 1); }
+  const bump = new THREE.CanvasTexture(bc);
+  bump.wrapS = bump.wrapT = THREE.RepeatWrapping;
+  bump.repeat.set(5, 5);
+
+  const shell = new THREE.MeshStandardMaterial({
+    color: 0xdcdcdc, roughness: 0.55, metalness: 0.04,
+    transparent: true, opacity: 1, bumpMap: bump, bumpScale: 0.05,
   });
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.4 });
   const grayDark = new THREE.MeshStandardMaterial({ color: 0x8c8c8c, roughness: 0.5 });
+  const eyeGlowMat = new THREE.MeshBasicMaterial({ color: 0x14f0f0 });
+  const eyeAmbientMat = new THREE.MeshStandardMaterial({ color: 0xa0b4b4, emissive: 0x2a4444, roughness: 0.4 });
   const intG = new THREE.MeshStandardMaterial({ color: 0x2fd06e, emissive: 0x0d4f27, roughness: 0.5 });
   const intB = new THREE.MeshStandardMaterial({ color: 0x2b4bb5, emissive: 0x0e1a44, roughness: 0.5 });
   const intR = new THREE.MeshStandardMaterial({ color: 0xe04840, emissive: 0x521210, roughness: 0.5 });
@@ -821,227 +827,92 @@ function buildAssembledRobot() {
   const intD = new THREE.MeshStandardMaterial({ color: 0x1a1e26, roughness: 0.5 });
   const intServo = new THREE.MeshStandardMaterial({ color: 0x2f74e0, emissive: 0x0a1f44, roughness: 0.42 });
 
-  // Collect all shell materials for x-ray toggle
-  const shellMats = [shellMat, accentMat];
-
+  const B = (w, h, d, m, x, y, z, p) => {
+    const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+    o.position.set(x, y, z); p.add(o); return o;
+  };
   const tag = (obj, id) => { obj.userData.pickComp = id; pickables.push(obj); };
 
-  // --- OLED Face Canvas Texture ---
-  const faceCanvas = document.createElement('canvas');
-  faceCanvas.width = 256; faceCanvas.height = 160;
-  const fCtx = faceCanvas.getContext('2d');
-  let blinkTimeout = null;
-
-  function drawEyes(closed) {
-    fCtx.fillStyle = '#060d15';
-    fCtx.fillRect(0, 0, 256, 160);
-    // Subtle glow background
-    const grd = fCtx.createRadialGradient(128, 80, 10, 128, 80, 90);
-    grd.addColorStop(0, 'rgba(20, 240, 240, 0.06)');
-    grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    fCtx.fillStyle = grd;
-    fCtx.fillRect(0, 0, 256, 160);
-    // Eyes
-    fCtx.fillStyle = '#14f0f0';
-    fCtx.shadowColor = '#14f0f0';
-    fCtx.shadowBlur = 18;
-    const eyeW = 44, eyeH = closed ? 8 : 52;
-    const eyeY = closed ? 72 : 40;
-    const r = 12;
-    // Left eye
-    drawRoundedRect(fCtx, 56, eyeY, eyeW, eyeH, r);
-    fCtx.fill();
-    // Right eye
-    drawRoundedRect(fCtx, 156, eyeY, eyeW, eyeH, r);
-    fCtx.fill();
-    // Pupils (only when open)
-    if (!closed) {
-      fCtx.shadowBlur = 0;
-      fCtx.fillStyle = '#060d15';
-      drawRoundedRect(fCtx, 70, 54, 16, 20, 6); fCtx.fill();
-      drawRoundedRect(fCtx, 170, 54, 16, 20, 6); fCtx.fill();
-    }
-    fCtx.shadowBlur = 0;
+  // Face texture
+  const fc = document.createElement('canvas');
+  fc.width = 256; fc.height = 160;
+  const fg = fc.getContext('2d');
+  function drawRobotFace(closed) {
+    fg.fillStyle = '#050b12'; fg.fillRect(0, 0, 256, 160);
+    fg.fillStyle = '#14f0f0'; fg.shadowColor = '#14f0f0'; fg.shadowBlur = 22;
+    const w = 54, h = closed ? 10 : 60, y = closed ? 62 : 34;
+    const rr = (g, x, y, w, h, r) => {
+      g.beginPath(); g.moveTo(x + r, y);
+      g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+      g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+    };
+    rr(fg, 44, y, w, h, 13); fg.fill();
+    rr(fg, 158, y, w, h, 13); fg.fill();
   }
+  drawRobotFace(false);
+  const robotFaceTex = new THREE.CanvasTexture(fc);
+  setInterval(() => { drawRobotFace(true); setTimeout(() => drawRobotFace(false), 160); }, 4600);
 
-  function drawRoundedRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-  }
+  // Base plate
+  const base = new THREE.Group(); root.add(base);
+  const plate = B(16, 1.6, 13, shell, 0, 0.8, 0, base);
+  B(16, 0.5, 13, shell, 0, 1.85, 0, base);
+  B(5, 0.12, 0.9, darkMat, -4.5, 2.25, 2.5, base);
+  B(5, 0.12, 0.9, darkMat, 1.5, 2.25, 2.5, base);
+  B(0.9, 0.12, 4, darkMat, -5.5, 2.25, -3, base);
+  tag(plate, 'rcase');
 
-  drawEyes(false);
-  const faceTex = new THREE.CanvasTexture(faceCanvas);
-
-  function blink() {
-    drawEyes(true);
-    faceTex.needsUpdate = true;
-    setTimeout(() => { drawEyes(false); faceTex.needsUpdate = true; }, 150);
-    blinkTimeout = setTimeout(blink, 3800 + Math.random() * 2400);
-  }
-  blinkTimeout = setTimeout(blink, 4200);
-
-  // --- Dimensions ---
-  const totalH = 18;
-  const headH = totalH * 0.40;       // ~7.2
-  const bodyH = totalH * 0.45;       // ~8.1
-  const baseH = totalH * 0.15;       // ~2.7
-  const bodyR = 5.5;                 // egg max radius
-  const headR = 4.8;                 // head dome radius
-  const neckR = 2.0;                 // hidden neck cylinder
-
-  // --- Helper: egg profile for LatheGeometry ---
-  function eggProfile(segments) {
-    const pts = [];
-    for (let i = 0; i <= segments; i++) {
-      const t = i / segments;
-      const angle = t * Math.PI;
-      // Egg: wider at bottom, tapering at top
-      const r = bodyR * Math.sin(angle) * (1 - 0.15 * Math.cos(angle));
-      const y = t * bodyH;
-      pts.push(new THREE.Vector2(Math.max(r, 0.01), y));
-    }
-    return pts;
-  }
-
-  // ============================================================
-  // BASE STAND
-  // ============================================================
-  const baseGroup = new THREE.Group();
-  root.add(baseGroup);
-
-  // Flat rounded disc base
-  const baseGeo = new THREE.CylinderGeometry(7.2, 7.6, 1.2, 48);
-  const baseMesh = new THREE.Mesh(baseGeo, shellMat);
-  baseMesh.position.y = 0.6;
-  baseGroup.add(baseMesh);
-  tag(baseMesh, 'rcase');
-
-  // Subtle rim
-  const rimGeo = new THREE.TorusGeometry(7.4, 0.15, 8, 48);
-  const rimMesh = new THREE.Mesh(rimGeo, grayDark);
-  rimMesh.rotation.x = Math.PI / 2;
-  rimMesh.position.y = 1.2;
-  baseGroup.add(rimMesh);
-
-  // ============================================================
-  // BODY — smooth egg shape
-  // ============================================================
-  const bodyGroup = new THREE.Group();
-  bodyGroup.position.y = 1.2;
-  baseGroup.add(bodyGroup);
-
-  const eggGeo = new THREE.LatheGeometry(eggProfile(48), 64);
-  const eggMesh = new THREE.Mesh(eggGeo, shellMat);
-  bodyGroup.add(eggMesh);
-  tag(eggMesh, 'rcase');
-
-  // Collar accent — torus ring at the neck/shoulder transition
-  const collarY = bodyH * 0.82;
-  const collarRadius = bodyR * Math.sin(Math.acos(1 - (collarY / bodyH) * 0.15)) * 0.78;
-  const collarGeo = new THREE.TorusGeometry(collarRadius + 0.3, 0.35, 12, 48);
-  const collarMesh = new THREE.Mesh(collarGeo, accentMat);
-  collarMesh.rotation.x = Math.PI / 2;
-  collarMesh.position.y = collarY;
-  bodyGroup.add(collarMesh);
-
-  // Second thinner accent line
-  const collar2Geo = new THREE.TorusGeometry(collarRadius + 0.8, 0.18, 8, 48);
-  const collar2Mesh = new THREE.Mesh(collar2Geo, accentMat);
-  collar2Mesh.rotation.x = Math.PI / 2;
-  collar2Mesh.position.y = collarY + 0.7;
-  bodyGroup.add(collar2Mesh);
-
-  // ============================================================
-  // PAN PIVOT (hidden inside body/neck joint)
-  // ============================================================
+  // Pan turntable
   const panPivot = new THREE.Group();
-  panPivot.position.set(0, bodyH - 0.5, 0);
-  bodyGroup.add(panPivot);
+  panPivot.position.set(0, 2.1, 0);
+  base.add(panPivot);
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.6, 1.0, 40), shell);
+  disc.position.y = 0.5; panPivot.add(disc);
+  tag(disc, 'pan');
 
-  // Hidden turntable disc
-  const discGeo = new THREE.CylinderGeometry(3.2, 3.4, 0.6, 36);
-  const discMesh = new THREE.Mesh(discGeo, shellMat);
-  discMesh.position.y = 0.3;
-  panPivot.add(discMesh);
-  tag(discMesh, 'pan');
-
-  // ============================================================
-  // NECK (hidden cylinder connecting body to head)
-  // ============================================================
-  const arm = new THREE.Group();
-  panPivot.add(arm);
-
-  const neckGeo = new THREE.CylinderGeometry(neckR, neckR + 0.3, 3.0, 28);
-  const neckMesh = new THREE.Mesh(neckGeo, shellMat);
-  neckMesh.position.y = 1.8;
-  arm.add(neckMesh);
+  // Neck arm
+  const arm = new THREE.Group(); panPivot.add(arm);
+  B(3.2, 6.6, 2.6, shell, 0, 3.9, -3.4, arm);
+  B(2.2, 5.0, 1.8, shell, 0, 3.1, 2.4, arm);
+  B(3.4, 2.8, 3.6, shell, 0, 7.6, -3.4, arm);
   tag(arm, 'tilt');
 
-  // ============================================================
-  // TILT PIVOT (hidden inside neck)
-  // ============================================================
+  // Head
   const tiltPivot = new THREE.Group();
-  tiltPivot.position.set(0, 3.3, 0);
-  arm.add(tiltPivot);
+  tiltPivot.position.set(0, 8.0, -1.0);
+  panPivot.add(tiltPivot);
 
-  // ============================================================
-  // HEAD — rounded dome
-  // ============================================================
-  const head = new THREE.Group();
-  tiltPivot.add(head);
+  const head = new THREE.Group(); tiltPivot.add(head);
+  const cube = B(9.8, 8.8, 9.0, shell, 0, 4.6, 0.6, head);
+  tag(cube, 'rcase');
 
-  // Main dome — hemisphere
-  const headGeo = new THREE.SphereGeometry(headR, 48, 32, 0, Math.PI * 2, 0, Math.PI * 0.55);
-  const headMesh = new THREE.Mesh(headGeo, shellMat);
-  headMesh.position.y = 0.4;
-  head.add(headMesh);
-  tag(headMesh, 'rcase');
+  // Screen frame
+  B(7.8, 5.6, 0.5, darkMat, 0, 5.0, 5.05, head);
+  const fz = 5.25;
+  B(9.6, 1.0, 0.8, shell, 0, 7.9, fz, head);
+  B(9.6, 1.0, 0.8, shell, 0, 2.1, fz, head);
+  B(1.0, 4.8, 0.8, shell, -4.3, 5.0, fz, head);
+  B(1.0, 4.8, 0.8, shell, 4.3, 5.0, fz, head);
 
-  // Bottom cap to close the dome
-  const capGeo = new THREE.CircleGeometry(headR * 0.82, 48);
-  const capMesh = new THREE.Mesh(capGeo, shellMat);
-  capMesh.rotation.x = Math.PI / 2;
-  capMesh.position.y = 0.1;
-  head.add(capMesh);
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(6.8, 4.3),
+    new THREE.MeshBasicMaterial({ map: robotFaceTex })
+  );
+  screen.position.set(0, 5.0, 5.33);
+  head.add(screen);
+  tag(screen, 'oled');
 
-  // Accent ring around head base
-  const headRingGeo = new THREE.TorusGeometry(headR * 0.85, 0.2, 8, 48);
-  const headRingMesh = new THREE.Mesh(headRingGeo, accentMat);
-  headRingMesh.rotation.x = Math.PI / 2;
-  headRingMesh.position.y = 0.25;
-  head.add(headRingMesh);
+  // Camera on top
+  B(1.7, 1.1, 1.3, darkMat, 2.7, 9.35, 4.0, head);
+  const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.55, 20), darkMat);
+  lens.rotation.x = Math.PI / 2 - 0.35;
+  lens.position.set(2.7, 9.5, 4.75);
+  head.add(lens);
 
-  // OLED screen — flat panel on front of dome (THE FACE)
-  const screenGeo = new THREE.PlaneGeometry(6.0, 4.0);
-  const screenMat = new THREE.MeshBasicMaterial({
-    map: faceTex,
-    transparent: false,
-  });
-  const screenMesh = new THREE.Mesh(screenGeo, screenMat);
-  screenMesh.position.set(0, 3.6, headR * 0.82);
-  head.add(screenMesh);
-  tag(screenMesh, 'oled');
+  // Bottom edge trim
+  B(9.8, 0.15, 9.0, grayDark, 0, 0.15, 0.6, head);
 
-  // Dark screen bezel
-  const bezelGeo = new THREE.PlaneGeometry(6.4, 4.4);
-  const bezelMesh = new THREE.Mesh(bezelGeo, darkMat);
-  bezelMesh.position.set(0, 3.6, headR * 0.82 - 0.01);
-  head.add(bezelMesh);
-
-  // Tiny camera dot on top
-  const camGeo = new THREE.SphereGeometry(0.35, 16, 12);
-  const camMesh = new THREE.Mesh(camGeo, darkMat);
-  camMesh.position.set(1.8, headR * 0.92, 1.5);
-  head.add(camMesh);
-
-  // ============================================================
-  // X-RAY INTERNALS
-  // ============================================================
+  // ---- X-RAY INTERNALS ----
   const xrayParts = [], xrayLabels = [];
   const part = (o) => { xrayParts.push(o); o.visible = false; return o; };
   const label = (txt, parent, x, y, z) => {
@@ -1066,55 +937,46 @@ function buildAssembledRobot() {
     return part(m);
   };
 
-  // OLED module (xray)
+  // OLED module
   const oledG = new THREE.Group(); head.add(oledG); part(oledG);
-  const oledPcb = new THREE.Mesh(new THREE.BoxGeometry(4.0, 3.0, 0.22), intB);
-  oledPcb.position.set(0, 3.6, 2.0); oledG.add(oledPcb);
-  label('SSD1306 OLED', oledG, 0, 5.8, 2.0);
+  B(4.0, 3.1, 0.22, intB, 0, 5.0, 3.55, oledG);
+  label('SSD1306 OLED', oledG, 0, 7.1, 3.6);
 
-  // XIAO module (xray)
+  // XIAO
   const xg = new THREE.Group(); head.add(xg); part(xg);
-  const xiaoPcb = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.24, 2.6), intG);
-  xiaoPcb.position.set(-0.3, 5.5, -1.0); xg.add(xiaoPcb);
-  const xiaoChip = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.3, 0.8), intM);
-  xiaoChip.position.set(-0.3, 5.6, -2.5); xg.add(xiaoChip);
-  const xcam = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.35, 16), intD);
+  B(3.4, 0.24, 2.6, intG, -0.4, 7.85, -1.7, xg);
+  B(0.9, 0.3, 0.8, intM, -0.4, 7.9, -3.25, xg);
+  const xcam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16), intD);
   xcam.rotation.x = Math.PI / 2;
-  xcam.position.set(0.8, 5.65, 0.3);
+  xcam.position.set(0.9, 7.95, -0.15);
   xg.add(xcam);
-  label('XIAO ESP32S3', xg, -0.3, 6.7, -1.0);
+  label('XIAO ESP32S3', xg, -0.4, 9.0, -1.7);
 
   // Jumpers XIAO -> OLED
   const jw = [['#e53935', -0.45], ['#787f8c', -0.15], ['#42a5f5', 0.15], ['#66bb6a', 0.45]];
   for (const [c, ox] of jw) {
-    jumper(head, [V(-0.3 + ox, 5.3, 0), V(ox * 2, 4.2, 1.2), V(ox, 3.8, 1.8)], c, 0.09);
+    jumper(head, [V(-0.4 + ox, 7.6, -0.6), V(ox * 2.2, 6.5, 1.6), V(ox, 5.4, 3.3)], c, 0.09);
   }
-  jumper(head, [V(-1.5, 5.3, -1.6), V(-1.0, 2.8, -2.0), V(-0.3, 0.4, -0.8)], '#42a5f5', 0.11);
-  jumper(head, [V(-1.1, 5.3, -1.6), V(-0.6, 2.8, -2.0), V(0.1, 0.4, -0.8)], '#66bb6a', 0.11);
+  jumper(head, [V(-1.6, 7.6, -2.2), V(-1.2, 4.2, -3.0), V(-0.4, 0.4, -1.4)], '#42a5f5', 0.11);
+  jumper(head, [V(-1.2, 7.6, -2.2), V(-0.8, 4.2, -3.0), V(0.0, 0.4, -1.4)], '#66bb6a', 0.11);
 
-  // PCA9685 (xray, in body)
+  // PCA9685 in base
   const pg = new THREE.Group(); root.add(pg); part(pg);
-  const pcaPcb = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.26, 2.6), intR);
-  pcaPcb.position.set(2.5, 3.5, 1.5); pg.add(pcaPcb);
-  const pcaTerm = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.85, 1.5), intG);
-  pcaTerm.position.set(4.5, 3.9, 1.5); pg.add(pcaTerm);
-  label('PCA9685', pg, 2.5, 5.2, 1.5);
+  B(5.4, 0.26, 2.6, intR, 3.6, 2.75, 3.0, pg);
+  B(1.4, 0.85, 1.5, intG, 5.6, 3.2, 3.0, pg);
+  label('PCA9685', pg, 3.6, 4.5, 3.0);
 
-  // Pan servo (xray)
+  // Pan servo
   const panG = new THREE.Group(); root.add(panG); part(panG);
-  const panServo = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.7, 4.3), intServo);
-  panServo.position.set(-1.5, 2.0, -0.5); panG.add(panServo);
-  label('Pan Servo', panG, -1.5, 4.0, -0.5);
+  B(3.4, 1.7, 4.3, intServo, -2.6, 1.25, -1.4, panG);
+  label('Pan Servo', panG, -2.6, 3.6, -1.4);
 
-  // Tilt servo (xray)
+  // Tilt servo
   const tiltG = new THREE.Group(); arm.add(tiltG); part(tiltG);
-  const tiltServo = new THREE.Mesh(new THREE.BoxGeometry(2.9, 2.1, 3.0), intServo);
-  tiltServo.position.set(0, 2.5, -1.5); tiltG.add(tiltServo);
-  label('Tilt Servo', tiltG, 0, 4.4, -1.5);
+  B(2.9, 2.1, 3.0, intServo, 0, 7.5, -3.4, tiltG);
+  label('Tilt Servo', tiltG, 0, 9.4, -3.4);
 
-  // ============================================================
-  // CABLES
-  // ============================================================
+  // ---- CABLES ----
   const cables = { v33: [], gnd: [], sda: [], scl: [], v5: [], servo0: [], servo1: [] };
   const P = (x, y, z) => new THREE.Vector3(x, y, z);
   function cable(parent, pts, color, r, net) {
@@ -1128,46 +990,41 @@ function buildAssembledRobot() {
     return m;
   }
 
-  // I2C bundle — runs through the body, up the neck
+  // I2C bundle
   for (const [col, net, ox] of [['#e53935', 'v33', -0.5], ['#787f8c', 'gnd', -0.17], ['#42a5f5', 'sda', 0.17], ['#66bb6a', 'scl', 0.5]]) {
-    cable(panPivot, [P(ox, 0.5, -2.0), P(ox * 1.2, 2.5, -3.0), P(ox, 4.5, -2.0), P(ox * 0.4, 5.5, -0.5)], col, 0.13, net);
+    cable(panPivot, [P(ox, 0.7, -3.0), P(ox * 1.4, 3.4, -4.6), P(ox, 7.0, -3.4), P(ox * 0.4, 8.3, -1.2)], col, 0.13, net);
   }
 
-  // Servo 1 (tilt) cables — from neck down into body
-  for (const [col, ox] of [['#ffa726', 0.3], ['#e53935', 0.0], ['#787f8c', -0.3]]) {
-    cable(panPivot, [P(ox + 0.6, 5.0, -0.5), P(ox + 0.8, 2.8, 1.0), P(ox + 0.5, 0.8, 0.5)], col, 0.12, 'servo1');
+  // Servo cables
+  for (const [col, ox] of [['#ffa726', 0.35], ['#e53935', 0.0], ['#787f8c', -0.35]]) {
+    cable(panPivot, [P(ox + 0.9, 7.9, -0.6), P(ox + 1.2, 4.4, 1.6), P(ox + 0.8, 1.1, 0.6)], col, 0.12, 'servo1');
   }
-
-  // Servo 0 (pan) cables — from base outward
-  for (const [col, ox] of [['#ffa726', 0.3], ['#e53935', 0.0], ['#787f8c', -0.3]]) {
-    cable(root, [P(ox - 0.3, 2.0, -3.0), P(ox - 0.3, 1.0, -5.0), P(ox - 0.3, 0.3, -7.0)], col, 0.12, 'servo0');
+  for (const [col, ox] of [['#ffa726', 0.35], ['#e53935', 0.0], ['#787f8c', -0.35]]) {
+    cable(root, [P(ox - 0.5, 2.6, -4.2), P(ox - 0.5, 1.4, -6.2), P(ox - 0.5, 0.5, -8.0)], col, 0.12, 'servo0');
   }
 
   // PSU cables
-  cable(root, [P(1.5, 1.8, -5.0), P(2.5, 0.8, -7.0), P(5.5, 0.3, -9.0)], '#d32f2f', 0.22, 'v5');
-  cable(root, [P(2.2, 1.8, -5.0), P(3.2, 0.7, -7.2), P(6.2, 0.25, -9.3)], '#787f8c', 0.18, 'gnd');
+  cable(root, [P(2.2, 1.6, -6.3), P(3.4, 0.9, -8.4), P(6.5, 0.35, -10.5)], '#d32f2f', 0.22, 'v5');
+  cable(root, [P(3.0, 1.6, -6.3), P(4.2, 0.8, -8.6), P(7.2, 0.3, -10.8)], '#787f8c', 0.18, 'gnd');
 
-  // ============================================================
-  // X-RAY TOGGLE
-  // ============================================================
+  // ---- X-RAY ----
   function setXray(on) {
-    for (const m of shellMats) { m.opacity = on ? 0.15 : 1; m.depthWrite = !on; }
+    shell.opacity = on ? 0.18 : 1;
+    shell.depthWrite = !on;
     for (const p of xrayParts) p.visible = on;
     for (const l of xrayLabels) l.visible = on;
   }
 
-  // ============================================================
-  // EXPLODED VIEW
-  // ============================================================
+  // ---- EXPLODED VIEW ----
   const homePos = {
     head: head.position.clone(),
     arm: arm.position.clone(),
     disc: panPivot.position.clone(),
   };
   const explodeOffset = {
-    head: new THREE.Vector3(0, 6, 3),
-    arm: new THREE.Vector3(0, 4.5, 0),
-    disc: new THREE.Vector3(0, 0, 5),
+    head: new THREE.Vector3(0, 7, 4),
+    arm: new THREE.Vector3(0, 5, 0),
+    disc: new THREE.Vector3(0, 0, 6),
   };
   const explodeLabels = [];
   function makeExplodeLabel(text, parent, x, y, z) {
@@ -1181,10 +1038,10 @@ function buildAssembledRobot() {
     explodeLabels.push(o);
     labelObjs.push(o);
   }
-  makeExplodeLabel('HEAD — OLED Face + XIAO', head, 0, 8, 2);
-  makeExplodeLabel('NECK — Tilt Servo (CH1)', arm, 0, 8, 0);
-  makeExplodeLabel('TURNTABLE — Pan Servo (CH0)', panPivot, 0, 1.5, 7);
-  makeExplodeLabel('BASE — PCA9685 + Power', root, 0, 0, 7);
+  makeExplodeLabel('HEAD — OLED + Camera + XIAO', head, 0, 10, 2);
+  makeExplodeLabel('NECK — Tilt Servo (CH1)', arm, 0, 10, 0);
+  makeExplodeLabel('TURNTABLE — Pan Servo (CH0)', panPivot, 0, 2, 8);
+  makeExplodeLabel('BASE — PCA9685 + Power', root, 0, 0, 8);
 
   function setExplosion(factor) {
     const t = Math.max(0, Math.min(1, factor));
