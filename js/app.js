@@ -311,38 +311,51 @@ function initIntro3D() {
 
 function buildIntroRobot() {
   const root = new THREE.Group();
-  const shell = new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.55, metalness: 0.04 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.4 });
+  const shell = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.55, metalness: 0.04 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.4 });
+  const screenMat = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
+  const eyeGlow = new THREE.MeshBasicMaterial({ color: 0x14f0f0 });
+  const eyeAmbient = new THREE.MeshStandardMaterial({ color: 0xa0b4b4, emissive: 0x2a4444, roughness: 0.4 });
+  const grayDark = new THREE.MeshStandardMaterial({ color: 0x8c8c8c, roughness: 0.5 });
 
   const B = (w, h, d, m, x, y, z, p) => {
     const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
     o.position.set(x, y, z); p.add(o); return o;
   };
+  const C = (rTop, rBot, h, m, x, y, z, p) => {
+    const o = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rBot, h, 32), m);
+    o.position.set(x, y, z); p.add(o); return o;
+  };
 
-  // Base
+  // Base plate
   B(8, 0.8, 6.5, shell, 0, 0.4, 0, root);
-  B(8, 0.25, 6.5, shell, 0, 0.92, 0, root);
+  B(8, 0.25, 6.5, grayDark, 0, 0.92, 0, root);
 
-  // Pan disc
-  const disc = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.8, 0.5, 32), shell);
-  disc.position.set(0, 1.2, 0); root.add(disc);
+  // Pan turntable disc
+  C(2.6, 2.8, 0.5, shell, 0, 1.2, 0, root);
 
-  // Neck
+  // Neck arm
   B(1.6, 3.3, 1.3, shell, 0, 3.1, -1.7, root);
+  B(2.0, 1.0, 1.6, shell, 0, 4.6, -1.7, root);
 
-  // Head
-  const head = B(4.9, 4.4, 4.5, shell, 0, 5.7, 0.3, root);
+  // Head body
+  const head = B(5.2, 4.6, 4.8, shell, 0, 5.8, 0.3, root);
 
-  // Screen frame
-  B(3.9, 2.8, 0.25, dark, 0, 5.9, 2.53, root);
+  // Screen face (dark recessed area)
+  B(4.2, 3.0, 0.3, screenMat, 0, 6.0, 2.68, root);
 
-  // Eyes (glowing teal)
-  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x5ec4b8 });
-  B(1.0, 1.1, 0.1, eyeMat, -0.9, 6.2, 2.68, root);
-  B(1.0, 1.1, 0.1, eyeMat, 0.9, 6.2, 2.68, root);
+  // Eyes — bright teal glow with ambient surround
+  B(1.2, 1.2, 0.1, eyeAmbient, -0.9, 6.2, 2.85, root);
+  B(1.2, 1.2, 0.1, eyeAmbient, 0.9, 6.2, 2.85, root);
+  B(0.8, 0.8, 0.08, eyeGlow, -0.9, 6.2, 2.92, root);
+  B(0.8, 0.8, 0.08, eyeGlow, 0.9, 6.2, 2.92, root);
 
-  // Camera on top
-  B(0.85, 0.55, 0.65, dark, 1.35, 8.15, 2.0, root);
+  // Camera bump on top
+  B(1.0, 0.6, 0.7, dark, 1.5, 8.35, 2.0, root);
+  C(0.3, 0.3, 0.15, dark, 1.5, 8.7, 2.35, root);
+
+  // Bottom edge trim
+  B(5.4, 0.15, 5.0, grayDark, 0, 3.45, 0.3, root);
 
   return root;
 }
@@ -636,8 +649,8 @@ function drawFace(closed) {
   if (!oledCtx) return;
   const g = oledCtx;
   g.fillStyle = '#06121f'; g.fillRect(0, 0, 256, 128);
-  g.fillStyle = '#5ec4b8'; g.strokeStyle = '#5ec4b8';
-  g.shadowColor = '#5ec4b8'; g.shadowBlur = 14;
+  g.fillStyle = '#14f0f0'; g.strokeStyle = '#14f0f0';
+  g.shadowColor = '#14f0f0'; g.shadowBlur = 14;
   const ex = [86, 170], ey = 52, r = 24;
   if (closed) {
     g.lineWidth = 6; g.lineCap = 'round';
@@ -793,10 +806,13 @@ function buildAssembledRobot() {
   bump.repeat.set(5, 5);
 
   const shell = new THREE.MeshStandardMaterial({
-    color: 0xf0f0f0, roughness: 0.55, metalness: 0.04,
+    color: 0xdcdcdc, roughness: 0.55, metalness: 0.04,
     transparent: true, opacity: 1, bumpMap: bump, bumpScale: 0.05,
   });
-  const darkMat = new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.4 });
+  const darkMat = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.4 });
+  const grayDark = new THREE.MeshStandardMaterial({ color: 0x8c8c8c, roughness: 0.5 });
+  const eyeGlowMat = new THREE.MeshBasicMaterial({ color: 0x14f0f0 });
+  const eyeAmbientMat = new THREE.MeshStandardMaterial({ color: 0xa0b4b4, emissive: 0x2a4444, roughness: 0.4 });
   const intG = new THREE.MeshStandardMaterial({ color: 0x2fd06e, emissive: 0x0d4f27, roughness: 0.5 });
   const intB = new THREE.MeshStandardMaterial({ color: 0x2b4bb5, emissive: 0x0e1a44, roughness: 0.5 });
   const intR = new THREE.MeshStandardMaterial({ color: 0xe04840, emissive: 0x521210, roughness: 0.5 });
@@ -816,7 +832,7 @@ function buildAssembledRobot() {
   const fg = fc.getContext('2d');
   function drawRobotFace(closed) {
     fg.fillStyle = '#050b12'; fg.fillRect(0, 0, 256, 160);
-    fg.fillStyle = '#5ec4b8'; fg.shadowColor = '#5ec4b8'; fg.shadowBlur = 22;
+    fg.fillStyle = '#14f0f0'; fg.shadowColor = '#14f0f0'; fg.shadowBlur = 22;
     const w = 54, h = closed ? 10 : 60, y = closed ? 62 : 34;
     const rr = (g, x, y, w, h, r) => {
       g.beginPath(); g.moveTo(x + r, y);
@@ -880,11 +896,14 @@ function buildAssembledRobot() {
   tag(screen, 'oled');
 
   // Camera on top
-  B(1.7, 1.1, 1.3, shell, 2.7, 9.35, 4.0, head);
+  B(1.7, 1.1, 1.3, darkMat, 2.7, 9.35, 4.0, head);
   const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.55, 20), darkMat);
   lens.rotation.x = Math.PI / 2 - 0.35;
   lens.position.set(2.7, 9.5, 4.75);
   head.add(lens);
+
+  // Bottom edge trim
+  B(9.8, 0.15, 9.0, grayDark, 0, 0.15, 0.6, head);
 
   // ---- X-RAY INTERNALS ----
   const xrayParts = [], xrayLabels = [];
