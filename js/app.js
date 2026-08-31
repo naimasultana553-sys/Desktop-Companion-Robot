@@ -378,6 +378,7 @@ let scrollActive = false;
 let scrollMode = null;
 let scrollSections = [];
 let scrollAnimFrame = null;
+let visitedModes = new Set();
 
 function enterScrollExperience(mode) {
   scrollMode = mode;
@@ -527,7 +528,12 @@ function setupScrollListener(mode) {
 
     const lastSection = data[totalStages - 1];
     if (progress > 0.92 && lastSection.freeMode) {
-      if (exitBtnActual) exitBtnActual.classList.add('visible');
+      if (exitBtnActual) {
+        exitBtnActual.classList.add('visible');
+        const other = scrollMode === 'workbench' ? 'robot' : 'workbench';
+        const label = other === 'robot' ? 'Robot' : 'Breadboard';
+        exitBtnActual.textContent = visitedModes.has(other) ? 'Enter Dashboard ✦' : `Explore ${label} Now →`;
+      }
     } else {
       if (exitBtnActual) exitBtnActual.classList.remove('visible');
     }
@@ -538,6 +544,30 @@ function setupScrollListener(mode) {
 }
 
 function exitScrollExperience() {
+  const other = scrollMode === 'workbench' ? 'robot' : 'workbench';
+  const otherLabel = other === 'robot' ? 'Robot' : 'Breadboard';
+  if (!visitedModes.has(other)) {
+    visitedModes.add(scrollMode);
+    window.removeEventListener('scroll', scrollSections.onScroll);
+    if (scrollAnimFrame) cancelAnimationFrame(scrollAnimFrame);
+    document.getElementById('scroll-progress-fill').style.width = '0%';
+    document.getElementById('btn-exit-scroll').classList.remove('visible');
+    scrollMode = other;
+    const isWB = other === 'workbench';
+    workbenchGroup.visible = isWB;
+    robotData.root.visible = !isWB;
+    if (isWB) { robotData.setExplosion(0); robotData.setXray(false); }
+    syncLabels();
+    buildScrollSections(other);
+    window.scrollTo(0, 0);
+    const sc = document.getElementById('scroll-sections');
+    sc.style.height = (SCROLL_SECTIONS[other].length * 100) + 'vh';
+    setupScrollListener(other);
+    if (scrollSections.onScroll) scrollSections.onScroll();
+    return;
+  }
+
+  visitedModes.add(scrollMode);
   scrollActive = false;
 
   window.removeEventListener('scroll', scrollSections.onScroll);

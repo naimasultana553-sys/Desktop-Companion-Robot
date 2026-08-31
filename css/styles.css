@@ -116,8 +116,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   to { opacity: 1; transform: translateY(0); }
 }
 .intro-video-wrap {
-  width: 440px; max-width: 92vw;
-  max-height: 82vh;
+  width: 480px; max-width: 92vw;
   border-radius: 20px;
   overflow: hidden;
   background: #000;
@@ -135,10 +134,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 #intro-video {
   display: block;
   width: 100%;
-  height: 520px;
-  max-height: 58vh;
-  object-fit: cover;
-  object-position: center top;
+  height: auto;
 }
 .intro-text-wrap {
   position: absolute;
