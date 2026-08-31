@@ -221,6 +221,16 @@ function showIntro() {
   if (bExp) bExp.addEventListener('click', skipIntro);
 }
 
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.mode-card');
+  if (card && document.getElementById('mode-select') && !document.getElementById('mode-select').classList.contains('hidden')) {
+    const mode = card.dataset.mode;
+    if (mode) enterScrollExperience(mode);
+  }
+  const skipMode = e.target.closest('#btn-skip-mode');
+  if (skipMode) transitionToSite();
+});
+
 function transitionToModeSelect() {
   const introScreen = document.getElementById('intro-screen');
   introScreen.style.opacity = '0';
@@ -233,15 +243,7 @@ function transitionToModeSelect() {
     modeSelect.style.transition = 'opacity 0.5s ease';
     requestAnimationFrame(() => { modeSelect.style.opacity = '1'; });
 
-    document.querySelectorAll('.mode-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const mode = card.dataset.mode;
-        enterScrollExperience(mode);
-      });
-    });
-    document.getElementById('btn-skip-mode').addEventListener('click', () => {
-      transitionToSite();
-    });
+
   }, 500);
 }
 
