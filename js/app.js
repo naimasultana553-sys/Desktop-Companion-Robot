@@ -215,7 +215,18 @@ function showIntro() {
 
   document.getElementById('btn-skip').addEventListener('click', skipIntro);
   document.getElementById('btn-show-me').addEventListener('click', skipIntro);
-  document.getElementById('btn-explore').addEventListener('click', skipIntro);
+  document.getElementById('btn-explore').addEventListener('click', () => {
+    if (introSkipped) return;
+    introSkipped = true;
+    const introScreen2 = document.getElementById('intro-screen');
+    introScreen2.style.opacity = '0';
+    introScreen2.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => {
+      introScreen2.classList.add('hidden');
+      document.getElementById('mode-select').classList.add('hidden');
+      transitionToSite();
+    }, 500);
+  });
 }
 
 function transitionToModeSelect() {

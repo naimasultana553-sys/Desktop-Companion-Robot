@@ -196,6 +196,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 .btn-ghost:hover { color: var(--text-secondary); }
 .intro-text-wrap .btn-intro { padding: 10px 18px; font-size: 0.78rem; }
+#btn-explore { background: rgba(255,184,107,0.15); border-color: var(--amber); color: var(--amber); }
+#btn-explore:hover { background: var(--amber); color: #000; border-color: var(--amber); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,184,107,0.35); }
 .intro-text-wrap .btn-ghost { color: rgba(255,255,255,0.55); }
 .intro-text-wrap .btn-ghost:hover { color: #fff; }
 .arrow { margin-left: 6px; transition: transform 0.3s; display: inline-block; }
