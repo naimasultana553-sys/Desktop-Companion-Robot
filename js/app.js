@@ -213,9 +213,12 @@ function showIntro() {
   const introScreen = document.getElementById('intro-screen');
   introScreen.classList.remove('hidden');
 
-  document.getElementById('btn-skip').addEventListener('click', skipIntro);
-  document.getElementById('btn-show-me').addEventListener('click', skipIntro);
-  document.getElementById('btn-explore').addEventListener('click', () => {
+  const bSkip = document.getElementById('btn-skip');
+  const bShow = document.getElementById('btn-show-me');
+  const bExp = document.getElementById('btn-explore');
+  if (bSkip) bSkip.addEventListener('click', skipIntro);
+  if (bShow) bShow.addEventListener('click', skipIntro);
+  if (bExp) bExp.addEventListener('click', () => {
     if (introSkipped) return;
     introSkipped = true;
     const introScreen2 = document.getElementById('intro-screen');
@@ -223,7 +226,8 @@ function showIntro() {
     introScreen2.style.transition = 'opacity 0.5s ease';
     setTimeout(() => {
       introScreen2.classList.add('hidden');
-      document.getElementById('mode-select').classList.add('hidden');
+      const ms = document.getElementById('mode-select');
+      if (ms) ms.classList.add('hidden');
       transitionToSite();
     }, 500);
   });

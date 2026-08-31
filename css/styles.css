@@ -139,10 +139,11 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 .intro-text-wrap {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 55%, transparent 100%);
-  padding: 48px 20px 22px;
+  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.45) 55%, transparent 100%);
+  padding: 28px 20px 18px;
   text-align: center;
   border-radius: 0 0 20px 20px;
+  display: flex; justify-content: center;
 }
 .intro-title {
   font-family: var(--font-display);
