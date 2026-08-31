@@ -206,7 +206,7 @@ let introSkipped = false;
 function skipIntro() {
   if (introSkipped) return;
   introSkipped = true;
-  transitionToSite();
+  transitionToModeSelect();
 }
 
 function showIntro() {
@@ -218,21 +218,348 @@ function showIntro() {
   document.getElementById('btn-explore').addEventListener('click', skipIntro);
 }
 
-function transitionToSite() {
+function transitionToModeSelect() {
   const introScreen = document.getElementById('intro-screen');
   introScreen.style.opacity = '0';
   introScreen.style.transition = 'opacity 0.5s ease';
   setTimeout(() => {
     introScreen.classList.add('hidden');
-    document.getElementById('site').classList.remove('hidden');
-    document.getElementById('site').style.opacity = '0';
-    document.getElementById('site').style.transition = 'opacity 0.5s ease';
-    requestAnimationFrame(() => {
-      document.getElementById('site').style.opacity = '1';
+    const modeSelect = document.getElementById('mode-select');
+    modeSelect.classList.remove('hidden');
+    modeSelect.style.opacity = '0';
+    modeSelect.style.transition = 'opacity 0.5s ease';
+    requestAnimationFrame(() => { modeSelect.style.opacity = '1'; });
+
+    document.querySelectorAll('.mode-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const mode = card.dataset.mode;
+        enterScrollExperience(mode);
+      });
     });
+    document.getElementById('btn-skip-mode').addEventListener('click', () => {
+      transitionToSite();
+    });
+  }, 500);
+}
+
+function transitionToSite(startMode) {
+  const modeSelect = document.getElementById('mode-select');
+  if (modeSelect) modeSelect.classList.add('hidden');
+  const introScreen = document.getElementById('intro-screen');
+  introScreen.classList.add('hidden');
+
+  document.getElementById('site').classList.remove('hidden');
+  document.getElementById('site').style.opacity = '0';
+  document.getElementById('site').style.transition = 'opacity 0.5s ease';
+  requestAnimationFrame(() => {
+    document.getElementById('site').style.opacity = '1';
+  });
+  if (!scene) {
     initMainScene();
     initDashboard();
-  }, 500);
+  }
+  if (startMode) {
+    const btn = document.querySelector(`.mode-btn[data-mode="${startMode}"]`);
+    if (btn) btn.click();
+  }
+}
+
+// ============================================================
+// SECTION 3: SCROLL-DRIVEN 3D EXPERIENCE
+// ============================================================
+
+const SCROLL_SECTIONS = {
+  workbench: [
+    {
+      title: 'The Full Circuit',
+      desc: 'A complete breadboard prototype with 7 components and 17 color-coded wires connecting everything through I2C and power rails.',
+      tag: 'OVERVIEW',
+      camera: { p: [0, 60, 90], t: [0, 3, 0] },
+    },
+    {
+      title: 'XIAO ESP32-S3 Sense',
+      desc: 'The brain — runs face firmware, hosts the web control page, and manages the I2C bus talking to OLED and PCA9685.',
+      tag: 'MCU',
+      camera: { p: [-13, 10, 5], t: [-13, 1, -4] },
+      highlight: 'xiao',
+    },
+    {
+      title: 'SSD1306 OLED Display',
+      desc: 'The robot\'s face — draws 15+ expressions on a 0.96" screen. Only needs 4 wires via I2C (address 0x3C).',
+      tag: 'DISPLAY',
+      camera: { p: [-2, 10, 0], t: [-2, 1, -5] },
+      highlight: 'oled',
+    },
+    {
+      title: 'PCA9685 Servo Driver',
+      desc: '16-channel PWM driver generates precise pulses for the servos. Offloads timing from the ESP32 via I2C (address 0x40).',
+      tag: 'DRIVER',
+      camera: { p: [11, 10, 8], t: [11, 1, 0] },
+      highlight: 'pca',
+    },
+    {
+      title: 'Pan & Tilt Servos',
+      desc: 'Two SG90 micro servos — CH0 for horizontal pan, CH1 for vertical tilt. Powered from the 5V rail through PCA9685.',
+      tag: 'MOTORS',
+      camera: { p: [-4, 12, 16], t: [-4, 2, 7] },
+    },
+    {
+      title: '5V Power Supply',
+      desc: 'External 5V 3-4A supply feeds ONLY the servos through PCA9685 V+ terminal. Two stalled servos can pull 1A+ each.',
+      tag: 'POWER',
+      camera: { p: [16, 10, 18], t: [16, 1.5, 9] },
+      highlight: 'psu',
+    },
+    {
+      title: 'Explore Freely',
+      desc: 'Drag to rotate, scroll to zoom, click any component for details. You\'re now in full interactive mode.',
+      tag: 'FREE EXPLORATION',
+      camera: { p: [0, 50, 80], t: [0, 3, 0] },
+      freeMode: true,
+    },
+  ],
+  robot: [
+    {
+      title: 'The Complete Robot',
+      desc: '3D-printed shell houses all electronics — OLED face, pan/tilt mechanism, and XIAO brain — in a compact desktop companion.',
+      tag: 'OVERVIEW',
+      camera: { p: [0, 40, 70], t: [0, 7, 0] },
+    },
+    {
+      title: 'OLED Face Screen',
+      desc: 'The 0.96" SSD1306 display shows animated expressions — happy, curious, sleepy. Framed by the 3D-printed head shell.',
+      tag: 'FACE',
+      camera: { p: [0, 16, 18], t: [0, 10, 3] },
+      highlight: 'oled',
+    },
+    {
+      title: 'Neck & Tilt Mechanism',
+      desc: 'The tilt servo (CH1) is mounted in the neck arm, allowing the head to nod up and down. Connected via I2C through the pan pivot.',
+      tag: 'TILT',
+      camera: { p: [10, 14, 12], t: [0, 8, -1] },
+      highlight: 'tilt',
+    },
+    {
+      title: 'Pan Turntable',
+      desc: 'The pan servo (CH0) rotates the entire upper body left and right via a cylindrical turntable at the base.',
+      tag: 'PAN',
+      camera: { p: [-8, 10, 14], t: [-2, 3, 0] },
+      highlight: 'pan',
+    },
+    {
+      title: 'Base & Electronics',
+      desc: 'The base plate houses the PCA9685 servo driver and power distribution. I2C and servo cables run up through the neck.',
+      tag: 'BASE',
+      camera: { p: [12, 8, 12], t: [0, 2, 0] },
+      highlight: 'pca',
+    },
+    {
+      title: 'Explore Freely',
+      desc: 'Drag to rotate, scroll to zoom. Toggle X-Ray to see internal components, or use the explode slider to separate parts.',
+      tag: 'FREE EXPLORATION',
+      camera: { p: [0, 35, 65], t: [0, 7, 0] },
+      freeMode: true,
+    },
+  ],
+};
+
+let scrollActive = false;
+let scrollMode = null;
+let scrollSections = [];
+let scrollAnimFrame = null;
+
+function enterScrollExperience(mode) {
+  scrollMode = mode;
+
+  const modeSelect = document.getElementById('mode-select');
+  if (modeSelect) { modeSelect.classList.add('hidden'); }
+
+  if (!scene) {
+    initMainScene();
+    initDashboard();
+  }
+
+  const isWorkbench = mode === 'workbench';
+  workbenchGroup.visible = isWorkbench;
+  robotData.root.visible = !isWorkbench;
+  if (isWorkbench) {
+    robotData.setExplosion(0);
+    robotData.setXray(false);
+  }
+  syncLabels();
+
+  const site = document.getElementById('site');
+  site.classList.remove('hidden');
+  site.style.opacity = '1';
+
+  document.getElementById('scroll-experience').classList.remove('hidden');
+
+  const container = document.getElementById('three-container');
+  container.classList.add('scroll-fixed');
+
+  document.body.style.overflow = 'auto';
+  document.body.style.height = 'auto';
+
+  document.getElementById('sidebar').style.display = 'none';
+  document.getElementById('right-panel').style.display = 'none';
+  document.getElementById('navbar').style.display = 'none';
+  document.getElementById('mode-toggle').style.display = 'none';
+  document.getElementById('xray-controls').style.display = 'none';
+  document.getElementById('status-bar').style.display = 'none';
+  document.getElementById('viewer-controls').style.display = 'none';
+
+  controls.enableRotate = false;
+  controls.enablePan = false;
+  controls.enableZoom = false;
+
+  buildScrollSections(mode);
+  window.scrollTo(0, 0);
+
+  const sectionsContainer = document.getElementById('scroll-sections');
+  const totalSections = SCROLL_SECTIONS[mode].length;
+  sectionsContainer.style.height = (totalSections * 100) + 'vh';
+
+  setupScrollListener(mode);
+
+  const exitBtn = document.getElementById('btn-exit-scroll');
+  exitBtn.removeEventListener('click', exitScrollExperience);
+  exitBtn.addEventListener('click', exitScrollExperience);
+}
+
+function buildScrollSections(mode) {
+  const container = document.getElementById('scroll-sections');
+  container.innerHTML = '';
+  const data = SCROLL_SECTIONS[mode];
+  data.forEach((s, i) => {
+    const section = document.createElement('div');
+    section.className = 'scroll-section';
+    section.style.height = '100vh';
+    section.innerHTML = `
+      <div class="scroll-section-content" data-index="${i}">
+        <div class="section-num">${String(i + 1).padStart(2, '0')} / ${String(data.length).padStart(2, '0')}</div>
+        <h2>${s.title}</h2>
+        <p>${s.desc}</p>
+        <span class="section-tag">${s.tag}</span>
+      </div>
+    `;
+    container.appendChild(section);
+  });
+}
+
+function setupScrollListener(mode) {
+  if (scrollAnimFrame) cancelAnimationFrame(scrollAnimFrame);
+
+  const data = SCROLL_SECTIONS[mode];
+  const totalStages = data.length;
+  const hint = document.getElementById('scroll-hint');
+  const fill = document.getElementById('scroll-progress-fill');
+  const exitBtn = document.getElementById('btn-exit-btn');
+  const exitBtnActual = document.getElementById('btn-exit-scroll');
+  let lastStage = -1;
+
+  function onScroll() {
+    const scrollTop = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (maxScroll <= 0) return;
+    const progress = Math.max(0, Math.min(1, scrollTop / maxScroll));
+
+    if (fill) fill.style.width = (progress * 100) + '%';
+
+    if (hint && scrollTop > 100) hint.classList.add('hidden');
+    else if (hint) hint.classList.remove('hidden');
+
+    const rawStage = progress * (totalStages - 1);
+    const stageIdx = Math.floor(rawStage);
+    const stageFrac = rawStage - stageIdx;
+
+    const fromIdx = Math.min(stageIdx, totalStages - 1);
+    const toIdx = Math.min(stageIdx + 1, totalStages - 1);
+    const from = data[fromIdx];
+    const to = data[toIdx];
+
+    const ease = stageFrac < 0.5
+      ? 4 * stageFrac * stageFrac * stageFrac
+      : 1 - Math.pow(-2 * stageFrac + 2, 3) / 2;
+
+    const fp = from.camera.p, tp = to.camera.p;
+    const ft = from.camera.t, tt = to.camera.t;
+    camera.position.set(
+      fp[0] + (tp[0] - fp[0]) * ease,
+      fp[1] + (tp[1] - fp[1]) * ease,
+      fp[2] + (tp[2] - fp[2]) * ease
+    );
+    controls.target.set(
+      ft[0] + (tt[0] - ft[0]) * ease,
+      ft[1] + (tt[1] - ft[1]) * ease,
+      ft[2] + (tt[2] - ft[2]) * ease
+    );
+    controls.update();
+
+    const contents = document.querySelectorAll('.scroll-section-content');
+    contents.forEach((el, i) => {
+      const sectionTop = i * window.innerHeight;
+      const dist = Math.abs(scrollTop - sectionTop);
+      el.classList.toggle('visible', dist < window.innerHeight * 0.6);
+    });
+
+    if (stageIdx !== lastStage) {
+      lastStage = stageIdx;
+      const current = data[fromIdx];
+      if (current.highlight && !current.freeMode) {
+        if (scrollMode === 'workbench') {
+          setNetGlow(null, false);
+        }
+      }
+    }
+
+    const lastSection = data[totalStages - 1];
+    if (progress > 0.92 && lastSection.freeMode) {
+      if (exitBtnActual) exitBtnActual.classList.add('visible');
+    } else {
+      if (exitBtnActual) exitBtnActual.classList.remove('visible');
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  scrollSections = { onScroll };
+}
+
+function exitScrollExperience() {
+  scrollActive = false;
+
+  window.removeEventListener('scroll', scrollSections.onScroll);
+  if (scrollAnimFrame) cancelAnimationFrame(scrollAnimFrame);
+
+  const container = document.getElementById('three-container');
+  container.classList.remove('scroll-fixed');
+
+  document.getElementById('scroll-experience').classList.add('hidden');
+  document.getElementById('scroll-progress-fill').style.width = '0%';
+  document.getElementById('scroll-hint').classList.remove('hidden');
+  document.getElementById('btn-exit-scroll').classList.remove('visible');
+
+  document.body.style.overflow = 'hidden';
+  document.body.style.height = '100vh';
+
+  document.getElementById('sidebar').style.display = '';
+  document.getElementById('right-panel').style.display = '';
+  document.getElementById('navbar').style.display = '';
+  document.getElementById('mode-toggle').style.display = '';
+  document.getElementById('status-bar').style.display = '';
+  document.getElementById('viewer-controls').style.display = '';
+
+  const isWorkbench = scrollMode === 'workbench';
+  const btn = document.querySelector(`.mode-btn[data-mode="${scrollMode}"]`);
+  if (btn) btn.click();
+
+  controls.enableRotate = true;
+  controls.enablePan = true;
+  controls.enableZoom = true;
+
+  const data = SCROLL_SECTIONS[scrollMode];
+  const last = data[data.length - 1].camera;
+  camera.position.set(...last.p);
+  controls.target.set(...last.t);
 }
 
 // ============================================================

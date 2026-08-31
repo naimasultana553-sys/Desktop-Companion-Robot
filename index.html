@@ -40,6 +40,39 @@
   </div>
 </div>
 
+<!-- ==================== MODE SELECTION ==================== -->
+<div id="mode-select" class="hidden">
+  <div class="mode-select-content">
+    <p class="mode-select-label">CHOOSE YOUR EXPERIENCE</p>
+    <h1 class="mode-select-title">How would you like to <span class="accent-amber">explore</span>?</h1>
+    <div class="mode-cards">
+      <button class="mode-card" data-mode="workbench">
+        <div class="mode-card-icon">🔧</div>
+        <h2>Breadboard</h2>
+        <p>Trace wiring, circuit nets, and electronic connections</p>
+        <span class="mode-card-arrow">SCROLL TO EXPLORE →</span>
+      </button>
+      <button class="mode-card" data-mode="robot">
+        <div class="mode-card-icon">🤖</div>
+        <h2>Robot</h2>
+        <p>See the assembled structure and internal components</p>
+        <span class="mode-card-arrow">SCROLL TO EXPLORE →</span>
+      </button>
+    </div>
+    <button class="btn-intro btn-ghost" id="btn-skip-mode">SKIP TO DASHBOARD</button>
+  </div>
+</div>
+
+<!-- ==================== SCROLL EXPERIENCE ==================== -->
+<div id="scroll-experience" class="hidden">
+  <div id="scroll-progress-bar"><div id="scroll-progress-fill"></div></div>
+  <div class="scroll-hint" id="scroll-hint"><span>Scroll to explore</span><span class="scroll-hint-arrow">↓</span></div>
+  <div class="scroll-sections" id="scroll-sections"></div>
+  <div class="scroll-exit-wrap">
+    <button class="scroll-exit-btn" id="btn-exit-scroll">Enter Free Exploration ✦</button>
+  </div>
+</div>
+
 <!-- ==================== MAIN SITE ==================== -->
 <div id="site" class="hidden">
 
