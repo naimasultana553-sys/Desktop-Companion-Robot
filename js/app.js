@@ -218,19 +218,7 @@ function showIntro() {
   const bExp = document.getElementById('btn-explore');
   if (bSkip) bSkip.addEventListener('click', skipIntro);
   if (bShow) bShow.addEventListener('click', skipIntro);
-  if (bExp) bExp.addEventListener('click', () => {
-    if (introSkipped) return;
-    introSkipped = true;
-    const introScreen2 = document.getElementById('intro-screen');
-    introScreen2.style.opacity = '0';
-    introScreen2.style.transition = 'opacity 0.5s ease';
-    setTimeout(() => {
-      introScreen2.classList.add('hidden');
-      const ms = document.getElementById('mode-select');
-      if (ms) ms.classList.add('hidden');
-      transitionToSite();
-    }, 500);
-  });
+  if (bExp) bExp.addEventListener('click', skipIntro);
 }
 
 function transitionToModeSelect() {
