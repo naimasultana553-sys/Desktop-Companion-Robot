@@ -1359,7 +1359,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   inset: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: -1;
+  z-index: 605 !important;
 }
 
 /* Scroll progress bar */
