@@ -285,34 +285,34 @@ const SCROLL_SECTIONS = {
       title: 'XIAO ESP32-S3 Sense',
       desc: 'The brain — runs face firmware, hosts the web control page, and manages the I2C bus talking to OLED and PCA9685.',
       tag: 'MCU',
-      camera: { p: [-13, 10, 5], t: [-13, 1, -4] },
+      camera: { p: [-13, 18, 18], t: [-13, 1, -4] },
       highlight: 'xiao',
     },
     {
       title: 'SSD1306 OLED Display',
       desc: 'The robot\'s face — draws 15+ expressions on a 0.96" screen. Only needs 4 wires via I2C (address 0x3C).',
       tag: 'DISPLAY',
-      camera: { p: [-2, 10, 0], t: [-2, 1, -5] },
+      camera: { p: [-2, 18, 15], t: [-2, 1, -5] },
       highlight: 'oled',
     },
     {
       title: 'PCA9685 Servo Driver',
       desc: '16-channel PWM driver generates precise pulses for the servos. Offloads timing from the ESP32 via I2C (address 0x40).',
       tag: 'DRIVER',
-      camera: { p: [11, 10, 8], t: [11, 1, 0] },
+      camera: { p: [11, 18, 18], t: [11, 1, 0] },
       highlight: 'pca',
     },
     {
       title: 'Pan & Tilt Servos',
       desc: 'Two SG90 micro servos — CH0 for horizontal pan, CH1 for vertical tilt. Powered from the 5V rail through PCA9685.',
       tag: 'MOTORS',
-      camera: { p: [-4, 12, 16], t: [-4, 2, 7] },
+      camera: { p: [-4, 20, 30], t: [-4, 2, 7] },
     },
     {
       title: '5V Power Supply',
       desc: 'External 5V 3-4A supply feeds ONLY the servos through PCA9685 V+ terminal. Two stalled servos can pull 1A+ each.',
       tag: 'POWER',
-      camera: { p: [16, 10, 18], t: [16, 1.5, 9] },
+      camera: { p: [16, 20, 32], t: [16, 1.5, 9] },
       highlight: 'psu',
     },
     {
@@ -465,76 +465,84 @@ function setupScrollListener(mode) {
   const exitBtnActual = document.getElementById('btn-exit-scroll');
   let lastStage = -1;
 
+  let rafPending = false;
   function onScroll() {
-    const scrollTop = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (maxScroll <= 0) return;
-    const progress = Math.max(0, Math.min(1, scrollTop / maxScroll));
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      const scrollTop = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (maxScroll <= 0) return;
+      const progress = Math.max(0, Math.min(1, scrollTop / maxScroll));
 
-    if (fill) fill.style.width = (progress * 100) + '%';
+      if (fill) fill.style.width = (progress * 100) + '%';
 
-    if (hint && scrollTop > 100) hint.classList.add('hidden');
-    else if (hint) hint.classList.remove('hidden');
+      if (hint && scrollTop > 100) hint.classList.add('hidden');
+      else if (hint) hint.classList.remove('hidden');
 
-    const rawStage = progress * (totalStages - 1);
-    const stageIdx = Math.floor(rawStage);
-    const stageFrac = rawStage - stageIdx;
+      const rawStage = progress * (totalStages - 1);
+      const stageIdx = Math.floor(rawStage);
+      const stageFrac = rawStage - stageIdx;
 
-    const fromIdx = Math.min(stageIdx, totalStages - 1);
-    const toIdx = Math.min(stageIdx + 1, totalStages - 1);
-    const from = data[fromIdx];
-    const to = data[toIdx];
+      const fromIdx = Math.min(stageIdx, totalStages - 1);
+      const toIdx = Math.min(stageIdx + 1, totalStages - 1);
+      const from = data[fromIdx];
+      const to = data[toIdx];
 
-    const ease = stageFrac < 0.5
-      ? 4 * stageFrac * stageFrac * stageFrac
-      : 1 - Math.pow(-2 * stageFrac + 2, 3) / 2;
+      const ease = stageFrac < 0.5
+        ? 4 * stageFrac * stageFrac * stageFrac
+        : 1 - Math.pow(-2 * stageFrac + 2, 3) / 2;
 
-    const fp = from.camera.p, tp = to.camera.p;
-    const ft = from.camera.t, tt = to.camera.t;
-    camera.position.set(
-      fp[0] + (tp[0] - fp[0]) * ease,
-      fp[1] + (tp[1] - fp[1]) * ease,
-      fp[2] + (tp[2] - fp[2]) * ease
-    );
-    controls.target.set(
-      ft[0] + (tt[0] - ft[0]) * ease,
-      ft[1] + (tt[1] - ft[1]) * ease,
-      ft[2] + (tt[2] - ft[2]) * ease
-    );
-    controls.update();
+      const fp = from.camera.p, tp = to.camera.p;
+      const ft = from.camera.t, tt = to.camera.t;
+      camera.position.set(
+        fp[0] + (tp[0] - fp[0]) * ease,
+        fp[1] + (tp[1] - fp[1]) * ease,
+        fp[2] + (tp[2] - fp[2]) * ease
+      );
+      controls.target.set(
+        ft[0] + (tt[0] - ft[0]) * ease,
+        ft[1] + (tt[1] - ft[1]) * ease,
+        ft[2] + (tt[2] - ft[2]) * ease
+      );
+      controls.update();
 
-    const contents = document.querySelectorAll('.scroll-section-content');
-    contents.forEach((el, i) => {
-      const sectionTop = i * window.innerHeight;
-      const dist = Math.abs(scrollTop - sectionTop);
-      el.classList.toggle('visible', dist < window.innerHeight * 0.6);
-    });
+      const contents = document.querySelectorAll('.scroll-section-content');
+      contents.forEach((el, i) => {
+        const sectionTop = i * window.innerHeight;
+        const dist = Math.abs(scrollTop - sectionTop);
+        el.classList.toggle('visible', dist < window.innerHeight * 0.6);
+      });
 
-    if (stageIdx !== lastStage) {
-      lastStage = stageIdx;
-      const current = data[fromIdx];
-      if (current.highlight && !current.freeMode) {
-        if (scrollMode === 'workbench') {
-          setNetGlow(null, false);
+      if (stageIdx !== lastStage) {
+        lastStage = stageIdx;
+        const current = data[fromIdx];
+        if (current.highlight && !current.freeMode) {
+          if (scrollMode === 'workbench') {
+            setNetGlow(null, false);
+          }
         }
       }
-    }
 
-    const lastSection = data[totalStages - 1];
-    if (progress > 0.92 && lastSection.freeMode) {
-      if (exitBtnActual) {
-        exitBtnActual.classList.add('visible');
-        const other = scrollMode === 'workbench' ? 'robot' : 'workbench';
-        const label = other === 'robot' ? 'Robot' : 'Breadboard';
-        exitBtnActual.textContent = visitedModes.has(other) ? 'Enter Dashboard ✦' : `Explore ${label} Now →`;
+      const lastSection = data[totalStages - 1];
+      if (progress > 0.92 && lastSection.freeMode) {
+        if (exitBtnActual) {
+          exitBtnActual.classList.add('visible');
+          const other = scrollMode === 'workbench' ? 'robot' : 'workbench';
+          const label = other === 'robot' ? 'Robot' : 'Breadboard';
+          exitBtnActual.textContent = visitedModes.has(other) ? 'Enter Dashboard ✦' : `Explore ${label} Now →`;
+        }
+      } else {
+        if (exitBtnActual) exitBtnActual.classList.remove('visible');
       }
-    } else {
-      if (exitBtnActual) exitBtnActual.classList.remove('visible');
-    }
+    });
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
   scrollSections = { onScroll };
+  const _rafOnScroll = onScroll;
+  scrollSections._rafOnScroll = _rafOnScroll;
 }
 
 function exitScrollExperience() {

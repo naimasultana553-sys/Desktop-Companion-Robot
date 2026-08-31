@@ -1400,6 +1400,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   background: linear-gradient(90deg, var(--teal), var(--amber));
   transition: width 0.1s linear;
   border-radius: 0 2px 2px 0;
+  will-change: width;
 }
 
 /* Scroll hint */
@@ -1459,6 +1460,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   transform: translateY(20px);
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
   pointer-events: auto;
+  will-change: transform, opacity;
 }
 .scroll-section-content.visible {
   opacity: 1;
