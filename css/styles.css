@@ -136,28 +136,33 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   height: auto;
 }
 .intro-text-wrap {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 55%, transparent 100%);
+  padding: 48px 20px 22px;
   text-align: center;
-  max-width: 580px;
+  border-radius: 0 0 20px 20px;
 }
 .intro-title {
   font-family: var(--font-display);
-  font-size: 2.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
   line-height: 1.1;
-  color: var(--text-primary);
-  margin-bottom: 12px;
+  color: #fff;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
 }
 .intro-subtitle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-bottom: 32px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 16px;
   letter-spacing: 0.2px;
 }
 #intro-actions {
-  display: flex; gap: 16px;
+  display: flex; gap: 12px;
   flex-wrap: wrap; justify-content: center;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 .btn-intro {
   padding: 14px 30px;
@@ -190,6 +195,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   letter-spacing: 0.5px;
 }
 .btn-ghost:hover { color: var(--text-secondary); }
+.intro-text-wrap .btn-intro { padding: 10px 18px; font-size: 0.78rem; }
+.intro-text-wrap .btn-ghost { color: rgba(255,255,255,0.55); }
+.intro-text-wrap .btn-ghost:hover { color: #fff; }
 .arrow { margin-left: 6px; transition: transform 0.3s; display: inline-block; }
 .btn-primary:hover .arrow { transform: translateX(4px); }
 
