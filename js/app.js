@@ -395,18 +395,19 @@ function enterScrollExperience(mode) {
   document.getElementById('scroll-experience').classList.remove('hidden');
 
   const container = document.getElementById('three-container');
+  container._origParent = container.parentElement;
+  document.body.appendChild(container);
   container.classList.add('scroll-fixed');
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 
   document.body.style.overflow = 'auto';
   document.body.style.height = 'auto';
 
-  document.getElementById('sidebar').style.display = 'none';
-  document.getElementById('right-panel').style.display = 'none';
-  document.getElementById('navbar').style.display = 'none';
-  document.getElementById('mode-toggle').style.display = 'none';
-  document.getElementById('xray-controls').style.display = 'none';
-  document.getElementById('status-bar').style.display = 'none';
-  document.getElementById('viewer-controls').style.display = 'none';
+  document.getElementById('site').style.display = 'none';
 
   controls.enableRotate = false;
   controls.enablePan = false;
@@ -420,6 +421,7 @@ function enterScrollExperience(mode) {
   sectionsContainer.style.height = (totalSections * 100) + 'vh';
 
   setupScrollListener(mode);
+  if (scrollSections.onScroll) scrollSections.onScroll();
 
   const exitBtn = document.getElementById('btn-exit-scroll');
   exitBtn.removeEventListener('click', exitScrollExperience);
@@ -532,6 +534,7 @@ function exitScrollExperience() {
 
   const container = document.getElementById('three-container');
   container.classList.remove('scroll-fixed');
+  if (container._origParent) container._origParent.appendChild(container);
 
   document.getElementById('scroll-experience').classList.add('hidden');
   document.getElementById('scroll-progress-fill').style.width = '0%';
@@ -541,12 +544,23 @@ function exitScrollExperience() {
   document.body.style.overflow = 'hidden';
   document.body.style.height = '100vh';
 
+  document.getElementById('site').style.display = '';
   document.getElementById('sidebar').style.display = '';
   document.getElementById('right-panel').style.display = '';
   document.getElementById('navbar').style.display = '';
   document.getElementById('mode-toggle').style.display = '';
   document.getElementById('status-bar').style.display = '';
   document.getElementById('viewer-controls').style.display = '';
+
+  const vp = document.getElementById('viewport');
+  if (vp) {
+    const w = vp.clientWidth || window.innerWidth;
+    const h = vp.clientHeight || window.innerHeight;
+    renderer.setSize(w, h);
+    labelRenderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
 
   const isWorkbench = scrollMode === 'workbench';
   const btn = document.querySelector(`.mode-btn[data-mode="${scrollMode}"]`);
