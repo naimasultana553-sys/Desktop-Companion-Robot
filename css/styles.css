@@ -394,8 +394,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 
 /* X-Ray Controls */
 #xray-controls {
-  position: absolute; top: 64px; left: 50%;
-  transform: translateX(-50%);
+  position: absolute; bottom: 52px; left: 16px;
   display: flex; align-items: center; gap: 16px;
   background: rgba(0, 0, 0, 0.7);
   border: 1px solid var(--border);
@@ -403,6 +402,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   padding: 8px 16px;
   backdrop-filter: blur(8px);
   z-index: 10;
+  flex-wrap: wrap;
 }
 .xray-btn {
   padding: 6px 14px;
@@ -1052,51 +1052,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 .doc-link.placeholder { color: var(--text-muted); }
 
 /* ============================================================
-   TEAM
+   TEAM (removed)
    ============================================================ */
-.team-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.team-card {
-  padding: 20px;
-  text-align: center;
-}
-.team-avatar { font-size: 2.5rem; margin-bottom: 8px; }
-.team-card h4 { font-size: 1rem; margin-bottom: 4px; }
-.team-role {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--teal);
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.team-desc {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-.team-links { display: flex; gap: 10px; justify-content: center; }
-.team-link {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--teal);
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  transition: all var(--duration) var(--ease);
-}
-.team-link:hover { border-color: var(--teal); }
-.team-note {
-  padding: 14px;
-}
-.team-note p {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
 
 /* ============================================================
    TOOLTIP (for 3D hover)
@@ -1285,6 +1242,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   .block-row { gap: 6px; }
   .block { padding: 8px; font-size: 0.7rem; }
   .mobile-panel-toggle { width: 40px; height: 40px; font-size: 1rem; bottom: 46px; }
+  #xray-controls { left: 50%; transform: translateX(-50%); bottom: 96px; justify-content: center; }
 }
 
 /* ============================================================
