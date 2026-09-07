@@ -1713,9 +1713,9 @@ function initDashboard() {
   });
 
   // Mobile nav toggle
-  document.getElementById('nav-toggle').addEventListener('click', () => {
-    document.getElementById('nav-links').classList.toggle('open');
-  });
+  const nt = document.getElementById('nav-toggle');
+  const nl = document.getElementById('nav-links');
+  if (nt && nl) nt.addEventListener('click', () => nl.classList.toggle('open'));
 
   // Mobile sidebar panel toggle
   const mobileSidebarBtn = document.getElementById('mobile-sidebar-toggle');
