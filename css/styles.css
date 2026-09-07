@@ -40,7 +40,7 @@
 
   /* Spacing */
   --nav-height: 56px;
-  --sidebar-width: 240px;
+  --sidebar-width: 190px;
   --panel-width: 380px;
 
   /* Transitions */
@@ -150,27 +150,27 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   overflow-y: auto;
-  padding: calc(var(--nav-height) + 12px) 12px 16px;
+  padding: calc(var(--nav-height) + 8px) 8px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
-.sidebar-section { margin-bottom: 8px; }
+.sidebar-section { margin-bottom: 6px; }
 .sidebar-label {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.56rem;
   font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   color: var(--text-muted);
-  padding: 8px 12px 6px;
+  padding: 6px 10px 4px;
   text-transform: uppercase;
 }
 .sidebar-btn {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 8px;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-align: left;
@@ -178,7 +178,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 .sidebar-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
 .sidebar-btn.active { background: var(--teal-dim); color: var(--teal); }
-.sidebar-icon { font-size: 1rem; width: 22px; text-align: center; }
+.sidebar-icon { font-size: 0.8rem; width: 18px; text-align: center; }
 
 /* ============================================================
    CENTER VIEWPORT
@@ -1005,7 +1005,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
    ============================================================ */
 @media (max-width: 1200px) {
   :root {
-    --sidebar-width: 200px;
+    --sidebar-width: 175px;
     --panel-width: 320px;
   }
 }
