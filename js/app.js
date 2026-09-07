@@ -1156,20 +1156,8 @@ function buildAssembledRobot() {
   B(9.8, 0.15, 9.0, grayDark, 0, 0.15, 0.6, head);
 
   // ---- X-RAY INTERNALS ----
-  const xrayParts = [], xrayLabels = [];
+  const xrayParts = [];
   const part = (o) => { xrayParts.push(o); o.visible = false; return o; };
-  const label = (txt, parent, x, y, z) => {
-    const div = document.createElement('div');
-    div.className = 'pin-label';
-    div.textContent = txt;
-    const o = new CSS2DObject(div);
-    o.position.set(x, y, z);
-    o.userData.xray = true;
-    parent.add(o);
-    o.visible = false;
-    xrayLabels.push(o);
-    labelObjs.push(o);
-  };
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
   const jumper = (parent, pts, color, r = 0.1) => {
     const m = new THREE.Mesh(
@@ -1183,7 +1171,6 @@ function buildAssembledRobot() {
   // OLED module
   const oledG = new THREE.Group(); head.add(oledG); part(oledG);
   B(4.0, 3.1, 0.22, intB, 0, 5.0, 3.55, oledG);
-  label('SSD1306 OLED', oledG, 0, 7.1, 3.6);
 
   // XIAO
   const xg = new THREE.Group(); head.add(xg); part(xg);
@@ -1193,7 +1180,6 @@ function buildAssembledRobot() {
   xcam.rotation.x = Math.PI / 2;
   xcam.position.set(0.9, 7.95, -0.15);
   xg.add(xcam);
-  label('XIAO ESP32S3', xg, -0.4, 9.0, -1.7);
 
   // Jumpers XIAO -> OLED
   const jw = [['#e53935', -0.45], ['#787f8c', -0.15], ['#42a5f5', 0.15], ['#66bb6a', 0.45]];
@@ -1207,17 +1193,14 @@ function buildAssembledRobot() {
   const pg = new THREE.Group(); root.add(pg); part(pg);
   B(5.4, 0.26, 2.6, intR, 3.6, 2.75, 3.0, pg);
   B(1.4, 0.85, 1.5, intG, 5.6, 3.2, 3.0, pg);
-  label('PCA9685', pg, 3.6, 4.5, 3.0);
 
   // Pan servo
   const panG = new THREE.Group(); root.add(panG); part(panG);
   B(3.4, 1.7, 4.3, intServo, -2.6, 1.25, -1.4, panG);
-  label('Pan Servo', panG, -2.6, 3.6, -1.4);
 
   // Tilt servo
   const tiltG = new THREE.Group(); arm.add(tiltG); part(tiltG);
   B(2.9, 2.1, 3.0, intServo, 0, 7.5, -3.4, tiltG);
-  label('Tilt Servo', tiltG, 0, 9.4, -3.4);
 
   // ---- CABLES ----
   const cables = { v33: [], gnd: [], sda: [], scl: [], v5: [], servo0: [], servo1: [] };
@@ -1255,7 +1238,6 @@ function buildAssembledRobot() {
     shell.opacity = on ? 0.18 : 1;
     shell.depthWrite = !on;
     for (const p of xrayParts) p.visible = on;
-    for (const l of xrayLabels) l.visible = on;
   }
 
   // ---- EXPLODED VIEW ----
@@ -1269,30 +1251,12 @@ function buildAssembledRobot() {
     arm: new THREE.Vector3(0, 5, 0),
     disc: new THREE.Vector3(0, 0, 6),
   };
-  const explodeLabels = [];
-  function makeExplodeLabel(text, parent, x, y, z) {
-    const div = document.createElement('div');
-    div.className = 'pin-label';
-    div.textContent = text;
-    const o = new CSS2DObject(div);
-    o.position.set(x, y, z);
-    o.visible = false;
-    parent.add(o);
-    explodeLabels.push(o);
-    labelObjs.push(o);
-  }
-  makeExplodeLabel('HEAD — OLED + Camera + XIAO', head, 0, 10, 2);
-  makeExplodeLabel('NECK — Tilt Servo (CH1)', arm, 0, 10, 0);
-  makeExplodeLabel('TURNTABLE — Pan Servo (CH0)', panPivot, 0, 2, 8);
-  makeExplodeLabel('BASE — PCA9685 + Power', root, 0, 0, 8);
 
   function setExplosion(factor) {
     const t = Math.max(0, Math.min(1, factor));
     head.position.lerpVectors(homePos.head, homePos.head.clone().add(explodeOffset.head), t);
     arm.position.lerpVectors(homePos.arm, homePos.arm.clone().add(explodeOffset.arm), t);
     panPivot.position.lerpVectors(homePos.disc, homePos.disc.clone().add(explodeOffset.disc), t);
-    const showLabels = t > 0.15;
-    for (const l of explodeLabels) l.visible = showLabels;
   }
 
   scene.add(root);
