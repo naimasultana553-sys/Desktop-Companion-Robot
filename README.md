@@ -1,3 +1,5 @@
+﻿> Built by [Naima Sultana](https://github.com/naimasultana553-sys) | CSE Student, Bangladesh | [LinkedIn](https://www.linkedin.com/in/naima-sultana-76a678395)
+
 # Desktop Companion Robot — Complete Project Documentation
 
 ---
@@ -283,3 +285,4 @@ The Desktop Companion Robot demonstrates a complete, small-scale embedded system
 - **Power:** Logic power from XIAO 3V3; servo power from external 5V 3–4A rail
 - **Ground:** Common ground across all components
 - **Communication:** I2C (SDA = D4, SCL = D5) shared bus for OLED + PCA9685
+
