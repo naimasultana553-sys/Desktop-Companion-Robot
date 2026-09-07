@@ -213,64 +213,30 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
 }
 
 /* ============================================================
-   NAVIGATION
+   DASHBOARD LAYOUT
    ============================================================ */
-#navbar {
-  position: fixed; top: 0; left: 0; right: 0;
+#sidebar-brand {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-width);
   height: var(--nav-height);
-  display: flex; align-items: center;
+  display: flex; align-items: center; gap: 10px;
   padding: 0 20px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
   z-index: 100;
-  gap: 24px;
-}
-.nav-brand {
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1rem;
-  white-space: nowrap;
 }
 .nav-logo { font-size: 1.3rem; }
-.nav-links {
-  display: flex; gap: 4px;
-  margin-left: auto;
-  overflow-x: auto;
-}
-.nav-link {
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  transition: all var(--duration) var(--ease);
-}
-.nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); text-decoration: none; }
-.nav-link.active { color: var(--teal); background: var(--teal-dim); }
 
-.nav-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  padding: 8px;
-}
-.nav-toggle span {
-  display: block; width: 22px; height: 2px;
-  background: var(--text-secondary);
-  border-radius: 1px;
-  transition: all var(--duration) var(--ease);
-}
-
-/* ============================================================
-   DASHBOARD LAYOUT
-   ============================================================ */
 #dashboard {
   position: fixed;
-  top: var(--nav-height);
+  top: 0;
   left: 0; right: 0; bottom: 0;
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr var(--panel-width);
@@ -284,7 +250,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   overflow-y: auto;
-  padding: 16px 12px;
+  padding: calc(var(--nav-height) + 12px) 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1188,10 +1154,13 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
   }
+  #sidebar-brand {
+    width: 100%;
+  }
   #sidebar {
     position: fixed;
     left: -260px;
-    top: var(--nav-height);
+    top: 0;
     bottom: 0;
     width: 260px;
     z-index: 50;
@@ -1201,7 +1170,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   #right-panel {
     position: fixed;
     right: -400px;
-    top: var(--nav-height);
+    top: 0;
     bottom: 0;
     width: min(380px, 90vw);
     z-index: 50;
@@ -1209,21 +1178,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-
   }
   #right-panel.open { right: 0; }
   .mobile-panel-toggle { display: flex; }
-  .nav-toggle { display: flex; }
-  .nav-links { display: none; }
-  .nav-links.open {
-    display: flex;
-    position: fixed;
-    top: var(--nav-height);
-    left: 0; right: 0;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
-    padding: 12px;
-    flex-direction: column;
-    gap: 4px;
-    z-index: 49;
-  }
-  .nav-link { padding: 12px 16px; }
   #viewer-controls { top: 8px; right: 8px; }
   #mode-toggle { top: 8px; }
   .mode-btn { padding: 6px 10px; font-size: 0.72rem; }

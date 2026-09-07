@@ -414,6 +414,7 @@ function enterScrollExperience(mode) {
   document.body.style.height = 'auto';
 
   document.getElementById('site').style.display = 'none';
+  document.getElementById('sidebar-brand').style.display = 'none';
 
   controls.enableRotate = false;
   controls.enablePan = false;
@@ -590,7 +591,7 @@ function exitScrollExperience() {
   document.getElementById('site').style.display = '';
   document.getElementById('sidebar').style.display = '';
   document.getElementById('right-panel').style.display = '';
-  document.getElementById('navbar').style.display = '';
+  document.getElementById('sidebar-brand').style.display = '';
   document.getElementById('mode-toggle').style.display = '';
   document.getElementById('status-bar').style.display = '';
   document.getElementById('viewer-controls').style.display = '';
@@ -1693,29 +1694,8 @@ function initDashboard() {
     btn.addEventListener('click', () => {
       setActiveSidebar(btn.dataset.section);
       setActivePanel(btn.dataset.section);
-
-      // Update nav links too
-      document.querySelectorAll('.nav-link').forEach(l => {
-        l.classList.toggle('active', l.dataset.section === btn.dataset.section);
-      });
     });
   });
-
-  // Nav links
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      setActiveSidebar(link.dataset.section);
-      setActivePanel(link.dataset.section);
-      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-    });
-  });
-
-  // Mobile nav toggle
-  const nt = document.getElementById('nav-toggle');
-  const nl = document.getElementById('nav-links');
-  if (nt && nl) nt.addEventListener('click', () => nl.classList.toggle('open'));
 
   // Mobile sidebar panel toggle
   const mobileSidebarBtn = document.getElementById('mobile-sidebar-toggle');
