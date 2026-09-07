@@ -198,27 +198,15 @@ const PIN_LABELS = {
 };
 
 // ============================================================
-// SECTION 2: INTRO SCREEN (video-based)
+// SECTION 2: MODE SELECT (start screen)
 // ============================================================
 
-let introSkipped = false;
-
-function skipIntro() {
-  if (introSkipped) return;
-  introSkipped = true;
-  transitionToModeSelect();
-}
-
-function showIntro() {
-  const introScreen = document.getElementById('intro-screen');
-  introScreen.classList.remove('hidden');
-
-  const bSkip = document.getElementById('btn-skip');
-  const bShow = document.getElementById('btn-show-me');
-  const bExp = document.getElementById('btn-explore');
-  if (bSkip) bSkip.addEventListener('click', skipIntro);
-  if (bShow) bShow.addEventListener('click', skipIntro);
-  if (bExp) bExp.addEventListener('click', skipIntro);
+function showModeSelect() {
+  const modeSelect = document.getElementById('mode-select');
+  modeSelect.classList.remove('hidden');
+  modeSelect.style.opacity = '0';
+  modeSelect.style.transition = 'opacity 0.5s ease';
+  requestAnimationFrame(() => { modeSelect.style.opacity = '1'; });
 }
 
 document.addEventListener('click', (e) => {
@@ -231,27 +219,9 @@ document.addEventListener('click', (e) => {
   if (skipMode) transitionToSite();
 });
 
-function transitionToModeSelect() {
-  const introScreen = document.getElementById('intro-screen');
-  introScreen.style.opacity = '0';
-  introScreen.style.transition = 'opacity 0.5s ease';
-  setTimeout(() => {
-    introScreen.classList.add('hidden');
-    const modeSelect = document.getElementById('mode-select');
-    modeSelect.classList.remove('hidden');
-    modeSelect.style.opacity = '0';
-    modeSelect.style.transition = 'opacity 0.5s ease';
-    requestAnimationFrame(() => { modeSelect.style.opacity = '1'; });
-
-
-  }, 500);
-}
-
 function transitionToSite(startMode) {
   const modeSelect = document.getElementById('mode-select');
   if (modeSelect) modeSelect.classList.add('hidden');
-  const introScreen = document.getElementById('intro-screen');
-  introScreen.classList.add('hidden');
 
   document.getElementById('site').classList.remove('hidden');
   document.getElementById('site').style.opacity = '0';
@@ -593,7 +563,6 @@ function exitScrollExperience() {
   document.getElementById('right-panel').style.display = '';
   document.getElementById('sidebar-brand').style.display = '';
   document.getElementById('mode-toggle').style.display = '';
-  document.getElementById('status-bar').style.display = '';
   document.getElementById('viewer-controls').style.display = '';
 
   const vp = document.getElementById('viewport');
@@ -1747,7 +1716,7 @@ function onResize() {
 // ============================================================
 
 // Start
-showIntro();
+showModeSelect();
 
 // URL params for deep-linking
 const qp = new URLSearchParams(location.search);

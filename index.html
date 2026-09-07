@@ -20,20 +20,6 @@
 </head>
 <body>
 
-<!-- ==================== INTRO SCREEN ==================== -->
-<div id="intro-screen" aria-label="Robot introduction">
-  <div id="intro-overlay">
-    <div class="intro-video-wrap">
-      <video id="intro-video" autoplay muted loop playsinline>
-        <source src="intro-new.mp4" type="video/mp4">
-      </video>
-      <div class="intro-text-wrap">
-        <button class="btn-intro btn-secondary" id="btn-explore">EXPLORE MYSELF</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- ==================== MODE SELECTION ==================== -->
 <div id="mode-select" class="hidden">
   <div class="mode-select-content">
@@ -53,7 +39,7 @@
         <span class="mode-card-arrow">SCROLL TO EXPLORE →</span>
       </button>
     </div>
-    <button class="btn-intro btn-ghost" id="btn-skip-mode">SKIP TO DASHBOARD</button>
+    <button class="btn-ghost" id="btn-skip-mode">SKIP TO DASHBOARD</button>
   </div>
 </div>
 
@@ -177,27 +163,6 @@
         </div>
       </div>
 
-      <!-- Status Bar -->
-      <div id="status-bar" role="status">
-        <div class="status-item">
-          <span class="status-dot online"></span>
-          <span class="status-label">MCU</span>
-        </div>
-        <div class="status-item">
-          <span class="status-dot online"></span>
-          <span class="status-label">Power</span>
-        </div>
-        <div class="status-item">
-          <span class="status-dot online"></span>
-          <span class="status-label">Servo</span>
-        </div>
-        <div class="status-item">
-          <span class="status-dot online"></span>
-          <span class="status-label">Display</span>
-        </div>
-        <div class="status-mode">⚡ Simulation Mode</div>
-        <div class="status-hint">Drag = rotate · Scroll = zoom · Right-drag = pan · Click parts for details</div>
-      </div>
       <!-- Mobile panel toggles -->
       <button class="mobile-panel-toggle" id="mobile-sidebar-toggle" aria-label="Open sidebar menu">☰</button>
       <button class="mobile-panel-toggle mobile-panel-right" id="mobile-detail-toggle" aria-label="Open detail panel">ℹ</button>
